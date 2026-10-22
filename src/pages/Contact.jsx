@@ -4,6 +4,9 @@ import { AREAS, COMPANY, COURSES, byCode } from '../data/catalog';
 import { subjectFor } from '../lib/format';
 import { PageHead } from '../components/UI';
 import { Arrow, Chat, Check, Mail, Pin } from '../components/Icons';
+import PhoneField from '../components/PhoneField';
+import { byCountry, guessCountry } from '../data/countries';
+import { validateEnquiry } from '../../lib/validate.js';
 
 const FAQS = [
   ['How are courses delivered?', 'Courses are instructor-led and hands-on, combining expert-led sessions with practical labs and exercises. Talk to us about public, private and onsite options for your team.'],
@@ -13,7 +16,11 @@ const FAQS = [
   ['Do you offer support after training?', 'Technical mentorship is part of our approach: ongoing, one-on-one support to help learners apply new skills inside your enterprise.'],
 ];
 
-const EMPTY = { first: '', last: '', email: '', company: '', phone: '', course: '', subject: '', notes: '', website: '' };
+const MIN_FILL_MS = 3500, TOKEN_REFRESH_MS = 60 * 60 * 1000; // the API ignores forms sent in under 3s; tokens last 2h
+
+const EMPTY = { first: '', last: '', email: '', company: '', cc: guessCountry(), tel: '', course: '', subject: '', notes: '', website: '' };
+// The API gets one phone string: "+<dialling code> <number>".
+const withPhone = (v) => ({ ...v, phone: v.tel.trim() ? `+${byCountry[v.cc]?.dial ?? ''} ${v.tel.trim()}` : '' });
 
 export default function Contact() {
   const [params] = useSearchParams();
@@ -21,10 +28,18 @@ export default function Contact() {
   const pre = params.get('course') && byCode[params.get('course')] ? params.get('course') : '';
   const priv = params.get('type') === 'private';
   const [v, setV] = useState({ ...EMPTY, course: pre, subject: subjectFor(byCode[pre]), notes: priv ? 'We are interested in a private session for our team.' : '' });
-  const [status, setStatus] = useState('idle'); // idle | sending | sent | error
+  const [status, setStatus] = useState('idle'); // idle | sending | sent | invalid | error
   const [error, setError] = useState('');
   const [flash, setFlash] = useState(Boolean(pre));
-  const formRef = useRef(null), firstRef = useRef(null);
+  const formRef = useRef(null), firstRef = useRef(null), tokenRef = useRef(null);
+
+  // Signed anti-spam token from the API; requested when the form appears so the visitor's typing time counts.
+  const getToken = async () => {
+    const r = await fetch('/api/enquiries', { headers: { Accept: 'application/json' } });
+    const { token } = await r.json();
+    tokenRef.current = { token, at: Date.now() };
+  };
+  useEffect(() => { getToken().catch(() => {}); }, []);
 
   // arriving from an "Ask for details" button: refill, scroll to the form, highlight, focus
   useEffect(() => {
@@ -52,18 +67,24 @@ export default function Contact() {
   const mailtoFallback = () => {
     const c = byCode[v.course];
     const subject = c ? `Details and pricing request: ${c.name} (Course Code: ${c.code})` : 'Training enquiry';
-    const body = `${v.subject}\n\n${v.notes ? v.notes + '\n\n' : ''}Name: ${v.first} ${v.last}\nEmail: ${v.email}\nCompany: ${v.company}\nWork telephone: ${v.phone}\nCourse: ${c ? c.code + ' — ' + c.name : 'Not sure / custom program'}`;
+    const body = `${v.subject}\n\n${v.notes ? v.notes + '\n\n' : ''}Name: ${v.first} ${v.last}\nEmail: ${v.email}\nCompany: ${v.company}\nWork telephone: ${withPhone(v).phone}\nCourse: ${c ? c.code + ' — ' + c.name : 'Not sure / custom program'}`;
     window.location.href = `mailto:${COMPANY.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
   const submit = async (e) => {
     e.preventDefault();
+    const check = validateEnquiry(withPhone(v)); // same checks the server runs, so mistakes show instantly
+    if (!check.ok) { setStatus('invalid'); setError(check.error); return; }
     setStatus('sending'); setError('');
     try {
-      // Node.js backend: validates, saves the enquiry and emails the training team
-      const r = await fetch('/api/enquiries', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(v) });
+      if (!tokenRef.current || Date.now() - tokenRef.current.at > TOKEN_REFRESH_MS) await getToken().catch(() => {});
+      const wait = (tokenRef.current?.at ?? 0) + MIN_FILL_MS - Date.now();
+      if (wait > 0) await new Promise((ok) => setTimeout(ok, wait));
+      // Node.js backend: checks for spam, validates, saves the enquiry and emails the training team
+      const r = await fetch('/api/enquiries', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...withPhone(v), token: tokenRef.current?.token }) });
       const data = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(data.error || 'We could not send your enquiry right now.');
+      tokenRef.current = null; // tokens are single-use
       setStatus('sent');
     } catch (err) {
       setStatus('error'); setError(err.message);
@@ -80,7 +101,7 @@ export default function Contact() {
             <div style={{ width: 64, height: 64, margin: '0 auto 18px', color: 'var(--ok)' }}><Check /></div>
             <h2 style={{ fontSize: 28, marginBottom: 10 }}>Thanks, {v.first || 'there'}!</h2>
             <p className="lead" style={{ margin: '0 auto' }}>Your request{c ? <> for <b>{c.name}</b></> : ''} has been sent. Our team will reply to <b>{v.email}</b> with delivery options, availability and a quote.</p>
-            <button className="btn btn-ghost" style={{ marginTop: 24 }} onClick={() => { setV({ ...EMPTY }); setStatus('idle'); }}>Send another enquiry</button>
+            <button className="btn btn-ghost" style={{ marginTop: 24 }} onClick={() => { setV({ ...EMPTY }); setStatus('idle'); getToken().catch(() => {}); }}>Send another enquiry</button>
           </div>
         ) : (
           <form className="form reveal" id="cform" ref={formRef} onSubmit={submit}>
@@ -88,10 +109,10 @@ export default function Contact() {
               <div className="field"><label htmlFor="f-first">First name</label><input id="f-first" ref={firstRef} autoComplete="given-name" required value={v.first} onChange={set('first')} /></div>
               <div className="field"><label htmlFor="f-last">Last name</label><input id="f-last" autoComplete="family-name" required value={v.last} onChange={set('last')} /></div>
             </div>
-            <div className="field"><label htmlFor="f-email">Work email</label><input id="f-email" type="email" autoComplete="email" required value={v.email} onChange={set('email')} /></div>
+            <div className="field"><label htmlFor="f-email">Work email</label><input id="f-email" type="email" autoComplete="email" placeholder="name@yourcompany.com — no Gmail, Yahoo or Outlook" required value={v.email} onChange={set('email')} /></div>
             <div className="grid2">
               <div className="field"><label htmlFor="f-co">Company</label><input id="f-co" autoComplete="organization" value={v.company} onChange={set('company')} /></div>
-              <div className="field"><label htmlFor="f-tel">Work telephone</label><input id="f-tel" type="tel" autoComplete="tel" inputMode="tel" placeholder="+1 302 555 0100" pattern="[0-9+\(\)\s.\-]{6,}" title="Enter a valid phone number" value={v.phone} onChange={set('phone')} /></div>
+              <div className="field"><label htmlFor="f-tel">Work telephone</label><PhoneField id="f-tel" country={v.cc} number={v.tel} onCountry={(cc) => setV((s) => ({ ...s, cc }))} onNumber={(tel) => setV((s) => ({ ...s, tel }))} /></div>
             </div>
             <div className="field"><label htmlFor="f-course">Course</label>
               <select id="f-course" className={flash ? 'flash' : ''} value={v.course} onChange={onCourse}>
@@ -108,6 +129,7 @@ export default function Contact() {
             <button className="btn btn-primary" type="submit" disabled={status === 'sending'}>
               {status === 'sending' ? 'Sending…' : v.course ? 'Request details & quote' : 'Send enquiry'} <Arrow />
             </button>
+            {status === 'invalid' && <p role="alert" style={{ fontSize: 14, color: '#c0262d', marginTop: 12 }}>{error}</p>}
             {status === 'error' && (
               <p role="alert" style={{ fontSize: 14, color: '#c0262d', marginTop: 12 }}>
                 {error} <button type="button" className="linkbtn" onClick={mailtoFallback}>Send it by email instead</button>.

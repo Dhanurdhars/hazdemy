@@ -4,7 +4,9 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Hazdemy Learning — React (Vite) website + Vercel serverless API. Deploys with a single Vercel import.",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "concurrently -n api,web -c red,yellow \"node scripts/dev-api.js\" \"vite\"",
     "dev:web": "vite",
@@ -14,6 +16,7 @@
     "import": "node scripts/import-courses.js"
   },
   "dependencies": {
+    "flag-icons": "^7.2.3",
     "nodemailer": "^6.9.16",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

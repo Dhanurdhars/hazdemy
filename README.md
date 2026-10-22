@@ -109,5 +109,16 @@ npm test                      # API tests
 
 - **Passwords:** none are stored in the code. They live only in Vercel's Environment Variables, and `.env` and `.env.local` are excluded by `.gitignore`.
 - **Admin access:** the admin endpoints refuse every request until `ADMIN_PASSWORD` is set, and they compare passwords securely.
-- **Spam protection:** enquiries have a hidden spam-catching field and a limit of 5 per visitor every 10 minutes. Security headers are set in `vercel.json`.
+- **Spam protection:** the contact form and the API run the same checks (`lib/validate.js`):
+
+  | Field | Refused |
+  |---|---|
+  | First and last name | "test", "fake", "asdf", "aaaa", keyboard mashing like "sdfghjk", names with numbers or links |
+  | Work email | Personal addresses (Gmail, Yahoo, Outlook, Hotmail and others), about 100 throwaway inbox providers (Mailinator, YOPmail, 10minutemail …), sample addresses like test@… or x@example.com, and domains that don't exist or can't receive mail |
+  | Phone | Fewer than 7 or more than 15 digits, 0000000, 1234567 |
+  | Company and messages | Website links, HTML code, and spam words like SEO, casino or crypto |
+  | Bots | A hidden trap field, or a form sent less than 3 seconds after the page opened. These are quietly thrown away, so the bot thinks it worked. |
+  | Repeats | More than 3 enquiries a day from one email, or more than 5 every 10 minutes from one visitor |
+
+  The API also requires a signed, single-use form token, quietly ignores exact repeats within a day, and stops anyone making more than 20 attempts in 10 minutes. Failed attempts don't count toward the limits above, so people who fix a mistake aren't locked out (`lib/spam.js`). Optional settings: `FORM_SECRET`, a long random string for signing form tokens (by default one is derived from your other secrets), and `EMAIL_DNS_CHECK=false`, which turns off the email-domain check. Security headers are set in `vercel.json`.
 - **Personal data:** enquiries contain personal details. Keep the Vercel project and the Upstash database private to your team.

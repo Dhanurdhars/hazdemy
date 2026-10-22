@@ -1,25 +1,44 @@
-// POST /api/enquiries — validates, saves the enquiry and emails the training team
+// GET  /api/enquiries — a signed form token (the contact form fetches one when it loads)
+// POST /api/enquiries — checks for spam, validates, saves the enquiry and emails the training team
 import crypto from 'node:crypto';
 import { hset, overLimit, storageKind } from '../lib/store.js';
 import { findCourse } from '../lib/courses.js';
 import { validateEnquiry, escHtml } from '../lib/validate.js';
+import { issueFormToken, checkFormToken, emailDomainOk } from '../lib/spam.js';
 import { sendMail, mailEnabled } from '../lib/mailer.js';
 import { config } from '../lib/config.js';
 import { allow, send, jsonBody, clientIp } from '../lib/http.js';
 
+// Bots get the same reply as a real submission, so they can't tell they were caught.
+const ignore = (res) => send(res, 200, { ok: true });
+
 export default async function handler(req, res) {
-  if (!allow(req, res, ['POST'])) return;
+  if (!allow(req, res, ['GET', 'POST'])) return;
+  if (req.method === 'GET') return send(res, 200, { token: issueFormToken() }, { 'Cache-Control': 'no-store' });
   try {
-    if (await overLimit(`enq:${clientIp(req)}`, 5, 600)) return send(res, 429, { error: 'Too many requests — please try again in a few minutes.' });
+    const tooMany = () => send(res, 429, { error: 'Too many requests — please try again in a few minutes.' });
+    if (await overLimit(`enq-try:${clientIp(req)}`, 20, 600)) return tooMany(); // every attempt, so floods stop early
 
     let body; try { body = jsonBody(req); } catch { return send(res, 400, { error: 'Invalid request.' }); }
+    if (body.website) return ignore(res); // honeypot: hidden from people, bots fill it in
+    const token = checkFormToken(body.token);
+    if (token.reason === 'too-fast') return ignore(res);
+    if (!token.ok) return send(res, 400, { error: 'This form has expired — please reload the page and try again.' });
+
     const check = validateEnquiry(body);
     if (!check.ok) return send(res, 400, { error: check.error });
     const v = check.value;
-    if (v.website) return send(res, 200, { ok: true }); // honeypot → ignore bots silently
+    if (!(await emailDomainOk(v.email))) return send(res, 400, { error: 'That email domain cannot receive mail — please check your email address.' });
 
     // Nowhere to deliver it? Tell the browser so it can fall back to the visitor's email app.
     if (storageKind() === 'memory' && !mailEnabled()) return send(res, 503, { error: 'Online enquiries are not set up yet.' });
+
+    // Checked last, so a visitor who hit one of the errors above can fix it and resend with the same token.
+    if (await overLimit(`enq:${clientIp(req)}`, 5, 600)) return tooMany(); // enquiries that get through
+    if (await overLimit(`enq-email:${v.email}`, 3, 86400)) return send(res, 429, { error: 'You have sent several enquiries today already — we will be in touch soon.' });
+    const fingerprint = crypto.createHash('sha256').update([v.email, v.course, v.subject, v.notes].join('\n')).digest('hex');
+    if (await overLimit(`enq-dup:${fingerprint}`, 1, 86400)) return ignore(res); // same enquiry again within a day
+    if (await overLimit(`enq-token:${token.id}`, 1, 7200)) return ignore(res); // each form token works once
 
     const course = v.course ? await findCourse(v.course) : null;
     const enquiry = {

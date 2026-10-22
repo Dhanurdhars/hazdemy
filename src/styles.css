@@ -628,3 +628,23 @@ section.bot{padding:0}
 @keyframes cookieIn{from{opacity:0;transform:translateY(20px)}}
 .cookie-actions .btn{white-space:nowrap}
 @media (max-width:640px){.cookie{left:16px;bottom:16px;width:calc(100% - 32px);padding:16px}.cookie-actions .btn{flex:1;justify-content:center;padding:10px 12px}}
+/* phone field: country picker + number */
+.phone{position:relative;display:flex;scroll-margin-top:110px;align-items:stretch;border:1px solid var(--line);background:var(--bg);border-radius:12px;transition:.2s}
+.phone:focus-within{border-color:var(--brand);box-shadow:0 0 0 4px color-mix(in srgb,var(--brand) 14%,transparent)}
+.field .phone input{border:0;background:none;box-shadow:none;border-radius:0 12px 12px 0;min-width:0}
+.phone-cc{display:flex;align-items:center;gap:7px;padding:0 10px 0 12px;border:0;border-right:1px solid var(--line);background:none;cursor:pointer;font-weight:600;font-size:14.5px;border-radius:12px 0 0 12px;white-space:nowrap}
+.phone-cc:hover{background:var(--surface-2)}
+.phone-cc:focus-visible{outline:2px solid var(--brand);outline-offset:-2px}
+.phone-cc svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.4;color:var(--ink-3)}
+.flag{width:22px;height:16px;border-radius:3px;object-fit:cover;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.phone-pop{position:absolute;left:0;top:calc(100% + 6px);z-index:30;width:min(320px,calc(100vw - 48px));background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+.phone-search{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.phone-search svg{width:16px;height:16px;color:var(--ink-3);flex:none}
+.field .phone-search input{border:0;padding:4px 0;background:none;box-shadow:none;border-radius:0}
+.phone-pop ul{list-style:none;max-height:260px;overflow:auto;padding:6px}
+.phone-pop li{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;cursor:pointer;font-size:14px}
+.phone-pop li.on{background:var(--surface-2)}
+.phone-pop li[aria-selected="true"]{font-weight:600;color:var(--brand)}
+.phone-pop .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.phone-pop .dc{color:var(--ink-3);font-variant-numeric:tabular-nums}
+.phone-pop .none{color:var(--ink-3);cursor:default}

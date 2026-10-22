@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react';
 // On Vercel, /api/* files are deployed as serverless functions automatically — no proxy needed.
 export default defineConfig({
   plugins: [react()],
-  build: { target: 'es2022' },
+  // Flags stay separate files (fetched only when shown) instead of being inlined into the main bundle.
+  build: { target: 'es2022', assetsInlineLimit: (file) => (file.includes('flag-icons') ? false : undefined) },
   server: { port: 5173, proxy: { '/api': 'http://localhost:3001' } },
 });
