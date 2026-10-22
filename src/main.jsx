@@ -12,6 +12,7 @@ import NotFound from './pages/NotFound';
 import { About, Careers, Services } from './pages/Info';
 import Admin from './pages/Admin';
 import { loadCatalog } from './data/catalog';
+import Privacy from './pages/Privacy'
 
 await loadCatalog();
 
@@ -28,6 +29,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="about" element={<About />} />
           <Route path="careers" element={<Careers />} />
           <Route path="contact" element={<Contact />} />
+          <Route path="privacy" element={<Privacy />} />
           <Route path="admin" element={<Admin />} />
           <Route path="*" element={<NotFound />} />
         </Route>

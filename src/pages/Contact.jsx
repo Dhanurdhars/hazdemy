@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { AREAS, COMPANY, COURSES, byCode } from '../data/catalog';
 import { subjectFor } from '../lib/format';
 import { PageHead } from '../components/UI';
@@ -113,7 +113,7 @@ export default function Contact() {
                 {error} <button type="button" className="linkbtn" onClick={mailtoFallback}>Send it by email instead</button>.
               </p>
             )}
-            <p style={{ fontSize: 13, color: 'var(--ink-3)', marginTop: 12 }}>Your enquiry goes straight to our training team at {COMPANY.email}.</p>
+            <p style={{ fontSize: 13, color: 'var(--ink-3)', marginTop: 12 }}> By sending it you agree to our <Link to="/privacy" style={{ color: 'var(--brand)', textDecoration: 'underline' }}>Privacy &amp; Cookie Policy</Link>.</p>
           </form>
         )}
         <div className="info">
