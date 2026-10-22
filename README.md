@@ -85,6 +85,16 @@ Until these are set, the tab shows these steps. The numbers include only visitor
 
 Under **Settings → Domains**, add a domain such as `new.hazdemy.com` and follow the DNS instructions. Moving `hazdemy.com` itself replaces your current website, so try a subdomain first.
 
+### Search engines (SEO)
+
+Every build writes a separate HTML file for each page and each course (`scripts/prerender.js`). Each file has its own title, description, canonical link, link-preview tags (Open Graph and X/Twitter, with `public/og-image.jpg`) and structured data: the organisation on the home page, and a course plus breadcrumbs on course pages. Search engines and link previews on LinkedIn, WhatsApp or Slack read them without running JavaScript. The same details update in the browser as visitors move around (`src/seo.js` holds the wording for every page).
+
+- **Site address:** links use the project's production domain, which Vercel provides automatically. Once you add your own domain and mark it as the production domain, the next deploy uses it. To force an address, set `SITE_URL`, for example `https://www.hazdemy.com`.
+- **`/sitemap.xml` and `/robots.txt`** are generated on every build. `/admin` and unknown addresses are kept out of search results.
+- **Google Search Console:** add your domain at [search.google.com/search-console](https://search.google.com/search-console), then submit `https://<your domain>/sitemap.xml` under **Sitemaps**. Use **URL inspection** on a course page to see what Google sees.
+- **Check after deploying:** `curl -s https://<your domain>/training | grep -i "<title>"` should show "IBM Training Course Catalog | Hazdemy Learning", not the home page title. To preview a shared link, paste a page address into [LinkedIn's Post Inspector](https://www.linkedin.com/post-inspector/).
+- Courses uploaded through `/admin` work straight away, but they only get their own HTML file and sitemap entry at the next deploy.
+
 ---
 
 ## What works at each stage

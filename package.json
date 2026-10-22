@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "concurrently -n api,web -c red,yellow \"node scripts/dev-api.js\" \"vite\"",
     "dev:web": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/prerender.js",
     "preview": "vite preview",
     "test": "node --test test/*.test.js",
     "import": "node scripts/import-courses.js"

@@ -7,6 +7,7 @@ import ChatBot from '../bot/ChatBot';
 import CookieConsent from './CookieConsent';
 import { openCookieSettings } from '../lib/consent';
 import { bindTilt, observeReveals } from '../lib/effects';
+import { updateHead } from '../lib/head';
 
 const NAV = [['/', 'Home'], ['/training', 'Training'], ['/paths', 'Learning Paths'], ['/services', 'Enterprise'], ['/about', 'About'], ['/contact', 'Contact']];
 
@@ -31,6 +32,7 @@ export default function Layout() {
   const toggleTheme = useTheme();
 
   useEffect(() => { bindTilt(); }, []);
+  useEffect(() => { updateHead(loc.pathname); }, [loc.pathname]); // title, description, canonical, link-preview tags
   useEffect(() => {
     setOpen(false);
     if (!loc.search.includes('course=')) window.scrollTo({ top: 0, behavior: 'instant' });
