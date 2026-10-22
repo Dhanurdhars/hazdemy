@@ -8,7 +8,7 @@ export function getConsent() {
 
 export function setConsent(value) {
   try { localStorage.setItem(KEY, value); } catch { /* storage blocked */ }
-  if (value === 'accepted') loadOptional();
+  if (value === 'accepted') loadOptional(); else unloadOptional();
   window.dispatchEvent(new CustomEvent('hz:consent', { detail: value }));
 }
 
@@ -22,6 +22,11 @@ export function loadOptional() {
   const css = document.createElement('link');
   css.id = 'hz-fonts'; css.rel = 'stylesheet'; css.href = FONTS;
   document.head.appendChild(css);
+}
+
+/** Stops applying Google Fonts after consent is withdrawn (falls back to device fonts). */
+export function unloadOptional() {
+  document.getElementById('hz-fonts')?.remove();
 }
 
 /** Re-open the banner (used by the footer "Cookie settings" link). */
