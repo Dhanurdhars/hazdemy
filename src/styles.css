@@ -92,7 +92,7 @@ section{padding:96px 0}
 .pill b{background:linear-gradient(120deg,var(--brand-2),var(--brand));color:#fff;border-radius:999px;padding:3px 10px;font-size:12px}
 .hero h1{font-size:min(4.7vw,66px);margin:22px 0 14px}
 .hero h1 .ln{display:block;white-space:nowrap}
-.hero h1 .ln+.ln{background:linear-gradient(100deg,#f7cf7a,#e0675c 55%,#ff9a7a);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero h1 .ln+.ln{background:linear-gradient(100deg,#f7cf7a,#e0675c 55%,#ff9a7a);-webkit-background-clip:text;background-clip:text;color:transparent;padding-bottom:.14em;margin-bottom:-.14em}
 .hero .sub .rotator{height:1.2em;vertical-align:top}
 .hero .sub .rotator span{background:none;-webkit-text-fill-color:#f2b25c;color:#f2b25c}
 .hero .sub{font:600 clamp(20px,2.2vw,28px)/1.2 var(--f-head);color:var(--hero-ink);margin-bottom:18px;letter-spacing:-.01em}
