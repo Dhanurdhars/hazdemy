@@ -118,16 +118,16 @@ export default function Contact() {
             <button className="btn btn-ghost" style={{ marginTop: 24 }} onClick={() => { setV({ ...EMPTY }); setStatus('idle'); getToken().catch(() => {}); }}>Send another enquiry</button>
           </div>
         ) : (
-          <form className="form reveal" id="cform" ref={formRef} onSubmit={submit}>
+          <form className="form reveal" id="cform" ref={formRef} onSubmit={submit} noValidate>
             <div className="grid2">
               <div className={fieldCls('first')}><label htmlFor="f-first">First name</label><input id="f-first" ref={firstRef} autoComplete="given-name" required value={v.first} onChange={set('first')} {...aria('first')} /><Err k="first" /></div>
               <div className={fieldCls('last')}><label htmlFor="f-last">Last name</label><input id="f-last" autoComplete="family-name" required value={v.last} onChange={set('last')} {...aria('last')} /><Err k="last" /></div>
             </div>
             <div className={fieldCls('email')}><label htmlFor="f-email">Work email</label><input id="f-email" type="email" autoComplete="email" placeholder="name@yourcompany.com — no Gmail, Yahoo or Outlook" required value={v.email} onChange={set('email')} {...aria('email')} /><Err k="email" /></div>
             <div className="grid2">
-              <div className={fieldCls('company')}><label htmlFor="f-co">Company</label><input id="f-co" autoComplete="organization" value={v.company} onChange={set('company')} {...aria('company')} /><Err k="company" /></div>
+              <div className={fieldCls('company')}><label htmlFor="f-co">Company</label><input id="f-co" autoComplete="organization" required value={v.company} onChange={set('company')} {...aria('company')} /><Err k="company" /></div>
               <div className={fieldCls('phone')}><label htmlFor="f-tel">Work telephone</label>
-                <PhoneField id="f-tel" country={v.cc} number={v.tel} inputProps={aria('phone')}
+                <PhoneField id="f-tel" country={v.cc} number={v.tel} inputProps={{ required: true, ...aria('phone') }}
                   onCountry={(cc) => { clearBad('phone'); setV((s) => ({ ...s, cc })); }} onNumber={(tel) => { clearBad('phone'); setV((s) => ({ ...s, tel })); }} />
                 <Err k="phone" /></div>
             </div>

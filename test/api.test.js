@@ -42,7 +42,8 @@ before(async () => {
 after(() => { api.close(); fake.close(); });
 
 const auth = { Authorization: 'Bearer test-pass' };
-const post = (p, body, ip = '10.0.0.1') => fetch(base + p, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Forwarded-For': ip }, body: JSON.stringify(body) });
+// Company and phone are required, so every test enquiry gets realistic ones unless it sets its own.
+const post = (p, body, ip = '10.0.0.1') => fetch(base + p, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Forwarded-For': ip }, body: JSON.stringify({ company: 'Northwind Traders', phone: '+44 20 7946 0958', ...body }) });
 // A valid form token, issued 5s ago (the API ignores forms filled in faster than 3s).
 const tok = () => issueFormToken(Date.now() - 5000);
 const listEnquiries = async () => (await (await fetch(base + '/api/admin/enquiries', { headers: auth })).json()).enquiries;
@@ -111,7 +112,7 @@ test('spam: content, duplicates and per-email limit', async () => {
     { email: 'x@mailinator.com' }, { email: 'x@yopmail.com' }, { email: 'jose@gmail.com' }, { email: 'jose@yahoo.co.in' }, { email: 'jose@outlook.com' },
     { email: 'test@northwind-traders.com' }, { email: 'x@example.com' },
     { phone: '12345' }, { phone: '0000000' }, { phone: '1234567' }, { phone: '1234567890123456' },
-    { company: 'www.cheap.ru' }, { company: 'Lucky Casino' }, { notes: 'see https://x.io' }, { notes: '<b>hi</b>' }, { notes: 'We sell SEO packages' }, { notes: 'crypto offer' },
+    { company: '' }, { phone: '' }, { company: 'www.cheap.ru' }, { company: 'Lucky Casino' }, { notes: 'see https://x.io' }, { notes: '<b>hi</b>' }, { notes: 'We sell SEO packages' }, { notes: 'crypto offer' },
   ];
   for (const [i, r] of rejected.entries()) assert.equal(await status({ ...ok, ...r }, `10.0.4.${i}`), 400, JSON.stringify(r));
   // errors name the field, so the form can outline it
