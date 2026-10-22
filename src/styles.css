@@ -598,3 +598,20 @@ section.bot{padding:0}
 
 .adm-warn{margin-bottom:18px;padding:16px 18px;border-radius:14px;background:#fff7e6;border:1px solid #f3d29a;color:#5f4543;display:grid;gap:8px;font-size:14.5px}
 .adm-warn code{background:#fbe8c4;padding:1px 6px;border-radius:5px}
+/* ---------- brand logo image ---------- */
+.logo{display:flex;align-items:center;line-height:0}
+.logo img{height:52px;width:auto;display:block}
+.logo .logo-light-text{display:none}
+.ftr .logo .logo-dark-text,.hdr.on-dark:not(.solid) .logo .logo-dark-text{display:none}
+.ftr .logo .logo-light-text,.hdr.on-dark:not(.solid) .logo .logo-light-text{display:block}
+:root[data-theme="dark"] .logo .logo-dark-text{display:none}
+:root[data-theme="dark"] .logo .logo-light-text{display:block}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .logo .logo-dark-text{display:none}:root:not([data-theme="light"]) .logo .logo-light-text{display:block}}
+.bot-av{background:#fff;overflow:visible}
+.bot-av img{width:36px;height:36px;object-fit:contain}
+.hdr .wrap{height:84px}
+.hdr .logo img{height:66px}
+@media (max-width:640px){.hdr .wrap{height:72px}.hdr .logo img{height:54px}}
+@media (max-width:960px){.nav{inset:84px 0 auto 0}}
+@media (max-width:640px){.nav{inset:72px 0 auto 0}}
+.ftr .logo img{height:84px}

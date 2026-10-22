@@ -87,6 +87,7 @@ export function CTA({
 
 export const Logo = (props) => (
   <Link to="/" className="logo" aria-label="Hazdemy home" {...props}>
-    <span className="hmark" aria-hidden="true">H</span><span className="wm">azdemy</span>
+    <img className="logo-dark-text" src="/logo.png" alt="Hazdemy" width="651" height="252" />
+<img className="logo-light-text" src="/logo-light.png" alt="" aria-hidden="true" width="651" height="252" />
   </Link>
 );

@@ -95,7 +95,7 @@ export default function ChatBot() {
       </button>
       <section className="bot" role="dialog" aria-label="Hazdemy course advisor">
         <div className="bot-head">
-          <div className="bot-av">H</div>
+          <div className="bot-av"><img src="/logo-icon.png" alt="" /></div>
           <div><h4>Haz · Course Advisor</h4><p>Hazdemy Learning · replies instantly</p></div>
           <div className="hb">
             <button onClick={reset} title="Start over" aria-label="Start over"><Reset /></button>
