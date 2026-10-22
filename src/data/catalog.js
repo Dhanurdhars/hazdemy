@@ -35,8 +35,6 @@ export const TRACKS = {
 // Live ES-module bindings: importers always see the latest values after initCatalog()
 export let COURSES = [];
 export let byCode = {};
-export let AVAILABLE = 0;
-export let COMING = 0;
 export let PRODUCTS = [];
 
 export function initCatalog(raw) {
@@ -45,8 +43,6 @@ export function initCatalog(raw) {
     return { prereq: [], persona: [], ...c, tracks: tracks.length ? tracks : ['builders'] };
   });
   byCode = Object.fromEntries(COURSES.map((c) => [c.code, c]));
-  AVAILABLE = COURSES.filter((c) => c.status !== 'coming').length;
-  COMING = COURSES.length - AVAILABLE;
   PRODUCTS = [...new Set(COURSES.map((c) => c.product))];
 }
 

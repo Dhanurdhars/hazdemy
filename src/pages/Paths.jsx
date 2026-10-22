@@ -12,7 +12,8 @@ export default function Paths() {
   useEffect(() => { const x = setTimeout(observeReveals, 30); return () => clearTimeout(x); }, [t]);
   const T = TRACKS[t];
   const list = COURSES.filter((c) => c.tracks.includes(t));
-  const areas = Object.keys(AREAS).filter((a) => list.some((c) => c.area === a));
+  // AI leads the page; the other areas keep their catalog order.
+  const areas = ['AI', ...Object.keys(AREAS).filter((a) => a !== 'AI')].filter((a) => list.some((c) => c.area === a));
 
   return (
     <>

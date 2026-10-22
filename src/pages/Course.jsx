@@ -1,7 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
 import { COURSES, TRACKS, byCode, areaOf } from '../data/catalog';
 import { dur, hours, askPath } from '../lib/format';
-import { CourseCard, CTA, LevelBars, PageHead, Soon } from '../components/UI';
+import { CourseCard, CTA, LevelBars, PageHead } from '../components/UI';
 import { Arrow, Book, Check, Clock, Key, Target, Users } from '../components/Icons';
 import NotFound from './NotFound';
 
@@ -21,7 +21,6 @@ export default function Course() {
           <span className="m"><Clock />{dur(c.days)}</span>
           <span className="m"><Target />{c.level}</span>
           <span className="m"><Key />{c.code}</span>
-          {c.status === 'coming' && <span className="m soon-m">Coming soon</span>}
         </div>
       </PageHead>
       <div className="wrap">
@@ -45,7 +44,6 @@ export default function Course() {
               <div className="row"><dt>Area</dt><dd>{c.area}</dd></div>
               <div className="row"><dt>Duration</dt><dd>{dur(c.days)} · {hours(c.days)}</dd></div>
               <div className="row"><dt>Skill level</dt><dd style={{ display: 'flex', gap: 8, alignItems: 'center', '--c': a.c }}><LevelBars level={c.level} />{c.level}</dd></div>
-              <div className="row"><dt>Availability</dt><dd>{c.status === 'coming' ? <Soon course={c} /> : 'Available now'}</dd></div>
               <div className="row"><dt>Role tracks</dt><dd>{c.tracks.map((t) => TRACKS[t].name).join(', ')}</dd></div>
             </dl>
             <Link className="btn btn-primary" to={askPath(c)}>Ask for details <Arrow /></Link>

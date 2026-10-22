@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AREAS, AVAILABLE, COMING, COURSES, PRODUCTS, byCode, count } from '../data/catalog';
+import { AREAS, COURSES, PRODUCTS, byCode, count } from '../data/catalog';
 import { AreaIcon, Arrow } from '../components/Icons';
 import { CourseCard, CTA } from '../components/UI';
 import { initGlobe } from '../components/globeScene';
@@ -44,7 +44,7 @@ export default function Home() {
             <GlobeScene />
           </div>
           <div className="stats reveal">
-            <div className="stat"><b data-count={COURSES.length}>0</b><span>Courses · {AVAILABLE} available now, {COMING} coming soon</span></div>
+            <div className="stat"><b data-count={COURSES.length}>0</b><span>Instructor-led courses</span></div>
             <div className="stat"><b data-count="98" data-suffix="%">0</b><span>Customer satisfaction</span></div>
             <div className="stat"><b data-count="3000" data-suffix="+">0</b><span>Tailored training solutions</span></div>
             <div className="stat"><b data-count="750" data-suffix="+">0</b><span>Expert instructors</span></div>

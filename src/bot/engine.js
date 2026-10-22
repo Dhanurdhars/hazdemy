@@ -79,7 +79,7 @@ function search(q,extra={}){
 }
 
 const dtxt=d=>dur(d);
-function ccard(c,why){const a=AREAS[c.area]||AREAS.Data;return `<div class="bc" style="--c:${a.c}"><div class="t"><span>${esc(c.product)}</span><span>${esc(c.code)}</span></div><h5>${esc(c.name)}</h5><div class="m">${c.status==='coming'?'<span class="soon">Coming soon</span>':''}<span>⏱ ${dtxt(c.days)}</span><span>${lvlBars(c.level)} ${esc(c.level)}</span></div>${why&&why.length?`<div class="why">Matched on ${why.slice(0,3).join(', ')}</div>`:''}<div class="a"><button data-act="info" data-code="${esc(c.code)}">Details</button><a data-link href="/course/${encodeURIComponent(c.code)}" data-close>Open page</a><a class="pri" data-link href="/contact?course=${encodeURIComponent(c.code)}" data-close>Ask for details</a></div></div>`}
+function ccard(c,why){const a=AREAS[c.area]||AREAS.Data;return `<div class="bc" style="--c:${a.c}"><div class="t"><span>${esc(c.product)}</span><span>${esc(c.code)}</span></div><h5>${esc(c.name)}</h5><div class="m"><span>⏱ ${dtxt(c.days)}</span><span>${lvlBars(c.level)} ${esc(c.level)}</span></div>${why&&why.length?`<div class="why">Matched on ${why.slice(0,3).join(', ')}</div>`:''}<div class="a"><button data-act="info" data-code="${esc(c.code)}">Details</button><a data-link href="/course/${encodeURIComponent(c.code)}" data-close>Open page</a><a class="pri" data-link href="/contact?course=${encodeURIComponent(c.code)}" data-close>Ask for details</a></div></div>`}
 function fdesc(f){const p=[];if(f.level)p.push(f.level.toLowerCase());if(f.area)p.push(f.area);if(f.track)p.push('for '+TRACKS[f.track].name.toLowerCase());if(f.maxDays!=null)p.push(f.lbl||(f.maxDays<=1?'1 day or less':`up to ${Math.round(f.maxDays)} days`));if(f.minDays)p.push(`${f.minDays}+ days`);if(f.days)p.push(`${f.days}-day`);return p.join(', ')}
 function showResults(res,f,label){
   st.last=res;st.page=0;
@@ -91,7 +91,7 @@ function showResults(res,f,label){
 function moreChips(n){const q=[];if(n>(st.page+1)*3)q.push('Show more');if(st.last.length>1)q.push('Compare top 2');q.push('Shortest first','Start over');return q}
 function courseInfo(c){
   st.ctx=c;const a=AREAS[c.area]||AREAS.Data;
-  return say(`<div class="bc" style="--c:${a.c}"><div class="t"><span>${esc(c.area)} · ${esc(c.product)}</span><span>${esc(c.code)}</span></div><h5>${esc(c.name)}</h5><div class="m">${c.status==='coming'?'<span class="soon">Coming soon</span>':''}<span>⏱ ${dtxt(c.days)} (${hours(c.days)})</span><span>${lvlBars(c.level)} ${esc(c.level)}</span></div>
+  return say(`<div class="bc" style="--c:${a.c}"><div class="t"><span>${esc(c.area)} · ${esc(c.product)}</span><span>${esc(c.code)}</span></div><h5>${esc(c.name)}</h5><div class="m"><span>⏱ ${dtxt(c.days)} (${hours(c.days)})</span><span>${lvlBars(c.level)} ${esc(c.level)}</span></div>
   <p style="margin-top:8px;font-size:13px;color:var(--ink-2)">${esc(c.desc.length>320?c.desc.slice(0,317).replace(/\s+\S*$/,'')+'…':c.desc)}</p>
   ${c.persona.length?`<p style="margin-top:8px;font-size:13px"><b>Who it's for:</b> ${esc(c.persona.slice(0,2).join('; '))}${c.persona.length>2?'…':''}</p>`:''}
   <div class="a"><a data-link href="/course/${encodeURIComponent(c.code)}" data-close>Full course page</a><a class="pri" data-link href="/contact?course=${encodeURIComponent(c.code)}" data-close>Ask for details</a></div></div>`,['Prerequisites?','Who should attend?','Similar courses','Get details'],'wide');
@@ -127,7 +127,6 @@ function flowStep(t){
 
 /* ---------- FAQ ---------- */
 const FAQ=[
-  [/\b(coming soon|upcoming|new courses?|in development|launching|future courses?)\b/i,()=>{const r=COURSES.filter(c=>c.status==='coming').map(c=>({c,why:[]}));return showResults(r,{},`<b>${r.length}</b> new courses are coming soon — ask for details to get early access`)}],
   [/\b(price|pricing|cost|costs|fee|fees|quote|quotation|how much|budget|discount)\b/i,()=>st.ctx?say(`Pricing depends on delivery format, group size and location, so we send a tailored quote. I can open the request form for <b>${esc(st.ctx.name)}</b> with everything pre-filled.`,['Yes, get details','Another course']):say("Pricing depends on the course, delivery format and group size, so our team sends a tailored quote. Which course are you interested in? Type a product or course name and I'll set it up.",['Help me choose'])],
   [/\b(online|virtual|remote|onsite|on-site|in person|classroom|delivery|deliver|format|live)\b/i,()=>say("Our courses are <b>instructor-led and hands-on</b>, with labs and exercises throughout. We can run public sessions, private sessions for your team and onsite delivery — just tell us what suits you when you request details.",['Request details','Find a course'])],
   [/\b(certif|certificate|certification|badge|exam|credential)/i,()=>say("Courses include hands-on labs and capstones that leave learners with working artefacts. For certificates of completion or exam preparation on a specific course, ask our team — they'll confirm what's included.",['Ask the team','Find a course'])],

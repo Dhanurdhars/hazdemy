@@ -12,7 +12,6 @@ export const LevelBars = ({ level }) => {
   );
 };
 
-export const Soon = ({ course }) => (course.status === 'coming' ? <span className="soon">Coming soon</span> : null);
 
 export const AskButton = ({ course, small }) => (
   <Link className={`ask ${small ? 'sm' : ''}`} to={askPath(course)}>
@@ -25,7 +24,7 @@ export function CourseCard({ course: c, index = 0 }) {
   return (
     <div className="card" style={{ '--c': a.c, animationDelay: `${Math.min(index, 12) * 45}ms` }}>
       <Link className="card-link" to={coursePath(c)} aria-label={c.name} />
-      <div className="card-top"><span style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}><span className="tag">{c.area}</span><Soon course={c} /></span><span className="code">{c.code}</span></div>
+      <div className="card-top"><span style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}><span className="tag">{c.area}</span></span><span className="code">{c.code}</span></div>
       <h3>{c.name}</h3>
       <div className="prod">{c.product}</div>
       <p>{c.desc}</p>

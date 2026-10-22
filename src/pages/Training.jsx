@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { AREAS, AVAILABLE, COMING, COURSES, LEVELS, TRACKS, count, areaOf } from '../data/catalog';
+import { AREAS, COURSES, LEVELS, TRACKS, count, areaOf } from '../data/catalog';
 import { hours, coursePath } from '../lib/format';
-import { AskButton, CourseCard, LevelBars, PageHead, Soon } from '../components/UI';
+import { AskButton, CourseCard, LevelBars, PageHead } from '../components/UI';
 import { Arrow, Download, Grid, Search, Table } from '../components/Icons';
 import { toast } from '../lib/toast';
 
@@ -46,19 +46,19 @@ function Chips({ value, onChange, options }) {
 
 export default function Training() {
   const [params] = useSearchParams();
-  const [f, setF] = useState({ q: '', area: '', level: '', dur: '', track: '', status: '' });
+  const [f, setF] = useState({ q: '', area: '', level: '', dur: '', track: '' });
   const [sort, setSort] = useState({ k: 'code', dir: 1 });
   const [view, setView] = useState(() => { try { return localStorage.getItem('hz-view') || 'table'; } catch { return 'table'; } });
 
   useEffect(() => {
-    setF({ q: params.get('q') || '', area: params.get('area') || '', level: params.get('level') || '', dur: '', track: params.get('t') || '', status: params.get('status') || '' });
+    setF({ q: params.get('q') || '', area: params.get('area') || '', level: params.get('level') || '', dur: '', track: params.get('t') || '' });
   }, [params]);
   const set = (k) => (v) => setF((s) => ({ ...s, [k]: v }));
   const setViewP = (v) => { setView(v); try { localStorage.setItem('hz-view', v); } catch { /* ignore */ } };
 
   const list = useMemo(() => {
     const q = f.q.trim().toLowerCase();
-    const r = COURSES.filter((c) => (!f.status || c.status === f.status) && (!f.area || c.area === f.area) && (!f.level || c.level === f.level) && inDur(c.days, f.dur) && (!f.track || c.tracks.includes(f.track))
+    const r = COURSES.filter((c) => (!f.area || c.area === f.area) && (!f.level || c.level === f.level) && inDur(c.days, f.dur) && (!f.track || c.tracks.includes(f.track))
       && (!q || [c.name, c.code, c.product, c.desc, c.area, c.level, c.prereq.join(' '), c.persona.join(' ')].join(' ').toLowerCase().includes(q)));
     const { k, dir } = sort;
     return r.sort((a, b) => {
@@ -79,7 +79,7 @@ export default function Training() {
   return (
     <>
       <PageHead crumbs={[{ label: 'Training' }]} title="Training catalog"
-        lead={`${COURSES.length} instructor-led courses from the Hazdemy course directory — ${AVAILABLE} available now and ${COMING} coming soon — with product, course code, duration, description and skill level for every course.`} />
+        lead={`${COURSES.length} instructor-led courses from the Hazdemy course directory — with product, course code, duration, description and skill level for every course.`} />
       <div className="wrap wide"><div className="catalog">
         <div className="fpanel reveal">
           <label className="search"><Search /><input value={f.q} onChange={(e) => set('q')(e.target.value)} placeholder="Search by product, course code, name, description or persona" /></label>
@@ -87,7 +87,6 @@ export default function Training() {
             <div className="fgroup"><h4>Area</h4><Chips value={f.area} onChange={set('area')} options={[['', 'All'], ...Object.keys(AREAS).map((a) => [a, a, count('area', a)])]} /></div>
             <div className="fgroup"><h4>Skill level</h4><Chips value={f.level} onChange={set('level')} options={[['', 'All'], ...LEVELS.map((l) => [l, l, count('level', l)])]} /></div>
             <div className="fgroup"><h4>Duration</h4><Chips value={f.dur} onChange={set('dur')} options={[['', 'Any'], ...DUR]} /></div>
-            <div className="fgroup"><h4>Availability</h4><Chips value={f.status} onChange={set('status')} options={[['', 'All'], ['available', 'Available now', AVAILABLE], ['coming', 'Coming soon', COMING]]} /></div>
             <div className="fgroup"><h4>Role track</h4><Chips value={f.track} onChange={set('track')} options={[['', 'All'], ...Object.entries(TRACKS).map(([k, t]) => [k, t.name])]} /></div>
           </div>
         </div>
@@ -108,7 +107,7 @@ export default function Training() {
 
           {!list.length ? (
             <div className="empty"><h3 style={{ fontSize: 22, marginBottom: 8 }}>No results found</h3>
-              <p>Try a different search, or <button className="linkbtn" onClick={() => setF({ q: '', area: '', level: '', dur: '', track: '', status: '' })}>browse all our available courses</button>.</p></div>
+              <p>Try a different search, or <button className="linkbtn" onClick={() => setF({ q: '', area: '', level: '', dur: '', track: '' })}>browse all our available courses</button>.</p></div>
           ) : view === 'cards' ? (
             <div className="cards">{list.map((c, i) => <CourseCard key={c.code} course={c} index={i} />)}</div>
           ) : (
@@ -123,7 +122,7 @@ export default function Training() {
                 <tr key={c.code} style={{ '--c': areaOf(c).c, animationDelay: `${Math.min(i, 20) * 25}ms` }}>
                   <td data-l="Product"><span className="tag"><Hl text={c.product} q={q} /></span></td>
                   <td data-l="Course Code"><span className="code"><Hl text={c.code} q={q} /></span></td>
-                  <td data-l="Course Name"><Link className="cname" to={coursePath(c)}><Hl text={c.name} q={q} /></Link>{c.status === 'coming' && <div style={{ marginTop: 6 }}><Soon course={c} /></div>}</td>
+                  <td data-l="Course Name"><Link className="cname" to={coursePath(c)}><Hl text={c.name} q={q} /></Link></td>
                   <td data-l="Duration (days)" className="num">{c.days == null ? '—' : <span>{c.days}<small>{c.days < 1 ? '≈ ' : ''}{hours(c.days)}</small></span>}</td>
                   <td data-l="Course Description"><div className="clamp"><Hl text={c.desc} q={q} /></div></td>
                   <td data-l="Skill Level"><span className="lvlc"><LevelBars level={c.level} />{c.level}</span></td>
