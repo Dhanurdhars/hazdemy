@@ -4,6 +4,8 @@ import { COMPANY } from '../data/catalog';
 import { Logo } from './UI';
 import { Menu, Moon, Up } from './Icons';
 import ChatBot from '../bot/ChatBot';
+import CookieConsent from './CookieConsent';
+import { openCookieSettings } from '../lib/consent';
 import { bindTilt, observeReveals } from '../lib/effects';
 
 const NAV = [['/', 'Home'], ['/training', 'Training'], ['/paths', 'Learning Paths'], ['/services', 'Enterprise'], ['/about', 'About'], ['/contact', 'Contact']];
@@ -78,15 +80,16 @@ export default function Layout() {
               <p>Your global IT training partner — 98% customer satisfaction, 750+ expert instructors and hands-on, interactive teaching that turns learning into delivery.</p>
             </div>
             <div><h5>Explore</h5><ul><li><Link to="/">Home</Link></li><li><Link to="/training">Training catalog</Link></li><li><Link to="/paths">Learning paths</Link></li><li><Link to="/services">Enterprise training</Link></li></ul></div>
-            <div><h5>Company</h5><ul><li><Link to="/about">About</Link></li><li><Link to="/careers">Careers</Link></li><li><Link to="/contact">Contact</Link></li><li><Link to="/contact#faq">FAQ</Link></li></ul></div>
+            <div><h5>Company</h5><ul><li><Link to="/about">About</Link></li><li><Link to="/careers">Careers</Link></li><li><Link to="/contact">Contact</Link></li><li><Link to="/contact#faq">FAQ</Link></li><li><Link to="/privacy">Privacy &amp; Cookie Policy</Link></li></ul></div>
             <div><h5>Get in touch</h5><ul><li>{COMPANY.address}</li><li><a href={`mailto:${COMPANY.email}`}>{COMPANY.email}</a></li></ul></div>
           </div>
-          <div className="ftr-bot"><span>All Rights Reserved © {new Date().getFullYear()} Hazdemy</span><span>Empowering Minds. Enabling Futures.</span></div>
+          <div className="ftr-bot"><span>All Rights Reserved © {new Date().getFullYear()} Hazdemy · <Link to="/privacy">Privacy &amp; Cookie Policy</Link> · <button className="linkbtn ftr-cookie" onClick={openCookieSettings}>Cookie settings</button></span><span>Empowering Minds. Enabling Futures.</span></div>
         </div>
       </footer>
 
       <button className={`totop ${showTop ? 'show' : ''}`} onClick={() => scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Back to top"><Up /></button>
       <ChatBot />
+      <CookieConsent />
     </>
   );
 }
