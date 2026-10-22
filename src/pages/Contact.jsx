@@ -7,6 +7,7 @@ import { Arrow, Chat, Check, Mail, Pin } from '../components/Icons';
 import PhoneField from '../components/PhoneField';
 import { byCountry, guessCountry } from '../data/countries';
 import { validateEnquiry } from '../../lib/validate.js';
+import { track } from '../lib/consent';
 
 const FAQS = [
   ['How are courses delivered?', 'Courses are instructor-led and hands-on, combining expert-led sessions with practical labs and exercises. Talk to us about public, private and onsite options for your team.'],
@@ -99,6 +100,7 @@ export default function Contact() {
       if (!r.ok && FIELD_IDS[data.field]) return showBad(data.field, data.error);
       if (!r.ok) throw new Error(data.error || 'We could not send your enquiry right now.');
       tokenRef.current = null; // tokens are single-use
+      track('generate_lead', { course_code: v.course || 'none' }); // GA4 recommended event, usable as a conversion
       setStatus('sent');
     } catch (err) {
       setStatus('error'); setError(err.message);

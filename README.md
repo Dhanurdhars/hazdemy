@@ -56,6 +56,14 @@ Add these environment variables, then redeploy:
 | `CONTACT_TO` | `training@hazdemy.com` |
 | `SEND_CONFIRMATION` | `true`, to send visitors an automatic "we received your request" email |
 
+### Step 5: Optional Google Analytics
+
+1. The site's Measurement ID, `G-PP70XTSPMM`, is already in the code (`src/lib/consent.js`). It's used in deployed builds only, so local testing with `npm run dev` doesn't add visits to your reports.
+2. To use a different GA4 property, set the environment variable `VITE_GA_MEASUREMENT_ID` in Vercel and redeploy. The ID is built into the website, so a change only takes effect after a new deployment. Setting it locally in `.env.local` turns analytics on in `npm run dev` too.
+3. Analytics loads only for visitors who allow it in the cookie banner ("Accept all", or the **Analytics** switch under "Customize").
+4. Page views are recorded as visitors move between pages. This relies on GA4's enhanced measurement setting "Page changes based on browser history events", which is on by default; you'll find it under **Admin → Data streams → your stream → Enhanced measurement**. To check, accept cookies on the live site, click through a few pages, and watch them appear in **Reports → Realtime**.
+5. Each enquiry sent is recorded as a `generate_lead` event. To count enquiries as conversions, open **Admin → Events** in Google Analytics and mark `generate_lead` as a key event.
+
 ### Check that it's working
 
 - Open `https://your-project.vercel.app/api/health`. It should show `"storage":"redis"` and `"admin":true`. The `"mail"` value shows `"ok"` once email is set up.

@@ -27,12 +27,13 @@ export default function Privacy() {
         </ul>
 
         <h2>Cookies and similar technologies</h2>
-        <p>We do not use advertising or tracking cookies, and we do not use analytics tools that profile you. The site uses only the following:</p>
+        <p>We do not use advertising cookies. Apart from essential browser storage, everything below is optional and is only used if you agree to it in our cookie banner:</p>
         <ul>
-          <li><b>Browser storage (essential):</b> we use your browser’s local storage to remember your light/dark theme and catalogue view, and session storage to keep your chat with the course advisor while you browse. Session storage is cleared when you close the tab.</li>
-          <li><b>Fonts:</b> our fonts are loaded from Google Fonts, which means your browser connects to Google’s servers and shares your IP address with Google. Google does not set cookies for this.</li>
+          <li><b>Browser storage (essential):</b> we use your browser’s local storage to remember your light/dark theme, catalogue view and cookie choices, and session storage to keep your chat with the course advisor while you browse. Session storage is cleared when you close the tab.</li>
+          <li><b>Analytics (optional):</b> if you allow it, we use Google Analytics to understand how visitors use the site, for example which pages and courses are viewed, how people find us, and when an enquiry is sent. Google Analytics sets cookies (named <code>_ga</code> and <code>_ga_…</code>, kept for up to 2 years) and receives your IP address, device and browser details, and the pages you visit. We use this only in aggregate to improve the site and our training offerings, not for advertising.</li>
+          <li><b>Fonts (optional):</b> if you allow it, our fonts are loaded from Google Fonts, which means your browser connects to Google’s servers and shares your IP address with Google. Google does not set cookies for this. Otherwise we use fonts built into your device.</li>
         </ul>
-        <p>You can clear this information at any time by clearing your browser’s site data.</p>
+        <p>You can change or withdraw your consent at any time with the <b>Cookie settings</b> link at the bottom of every page. Turning analytics off stops Google Analytics and deletes its cookies. You can also clear this information by clearing your browser’s site data.</p>
 
         <h2>How we use information</h2>
         <ul>
@@ -49,7 +50,7 @@ export default function Privacy() {
           <li><b>Vercel</b>: website hosting.</li>
           <li><b>Upstash</b>: secure database where enquiries are stored.</li>
           <li><b>Our email provider</b>: to deliver your enquiry to our training team and send you a confirmation.</li>
-          <li><b>Google</b>: font delivery, as described above.</li>
+          <li><b>Google</b>: website analytics (Google Analytics) and font delivery, only with your consent, as described above.</li>
         </ul>
         <p>We may also disclose information where required by law or to protect our rights and users.</p>
 
