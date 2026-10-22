@@ -3,6 +3,7 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
 import fs from 'node:fs';
+import crypto from 'node:crypto';
 
 // ---- fake Upstash REST server ----
 const kv = new Map(), hashes = new Map();
@@ -24,6 +25,37 @@ const fake = http.createServer(async (req, res) => {
   res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify({ result }));
 });
 
+// ---- fake Google sign-in + GA4 Data API (checks the service-account JWT signature and the bearer token) ----
+const gaKeys = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+const gaSeen = [];
+const google = http.createServer(async (req, res) => {
+  const chunks = []; for await (const c of req) chunks.push(c);
+  const body = Buffer.concat(chunks).toString();
+  const json = (code, o) => { res.statusCode = code; res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(o)); };
+  if (req.url === '/token') {
+    const [h, p, sig] = new URLSearchParams(body).get('assertion').split('.');
+    const ok = crypto.createVerify('RSA-SHA256').update(`${h}.${p}`).verify(gaKeys.publicKey, sig, 'base64url');
+    const claims = JSON.parse(Buffer.from(p, 'base64url'));
+    gaSeen.push({ ok, scope: claims.scope, iss: claims.iss });
+    return ok ? json(200, { access_token: 'ga-token', expires_in: 3600 }) : json(400, { error: 'invalid_grant' });
+  }
+  if (req.url !== '/v1beta/properties/123456:batchRunReports') return json(404, {});
+  if (req.headers.authorization !== 'Bearer ga-token') return json(401, { error: { message: 'no token' } });
+  const row = (d, m) => ({ dimensionValues: d.map((value) => ({ value })), metricValues: m.map((value) => ({ value: String(value) })) });
+  const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  const reports = JSON.parse(body).requests.map((r) => {
+    const dim = r.dimensions?.[0]?.name, met = r.metrics[0].name, filter = r.dimensionFilter?.filter;
+    if (!dim) return { rows: [row(['date_range_0'], [120, 150, 640, 0.61]), row(['date_range_1'], [100, 130, 500, 0.55])] };
+    if (dim === 'eventName') return { rows: [row(['generate_lead', 'date_range_0'], [4]), row(['generate_lead', 'date_range_1'], [2])] };
+    if (dim === 'date' && filter) return { rows: [row([today], [3])] };
+    if (dim === 'date') return { rows: [row([today], [20, 90])] }; // GA leaves out days without visits
+    if (dim === 'pagePath' && filter) return { rows: [row(['/course/HAZ-AT-008'], [33])] };
+    if (dim === 'pagePath') return { rows: [row(['/'], [300]), row(['/training'], [180])] };
+    return { rows: [row([`${dim}-top`], [met === 'sessions' ? 70 : 60])] };
+  });
+  json(200, { reports });
+});
+
 let api, base, issueFormToken;
 before(async () => {
   await new Promise((ok) => fake.listen(0, ok));
@@ -33,13 +65,17 @@ before(async () => {
   process.env.SMTP_HOST = '';
   process.env.FORM_SECRET = 'test-secret';
   process.env.EMAIL_DNS_CHECK = 'false'; // no network lookups in tests
+  await new Promise((ok) => google.listen(0, ok));
+  const g = `http://127.0.0.1:${google.address().port}`;
+  Object.assign(process.env, { GA_PROPERTY_ID: '123456', GA_TOKEN_URL: `${g}/token`, GA_API_BASE: g,
+    GA_SERVICE_ACCOUNT_JSON: JSON.stringify({ client_email: 'reports@hazdemy.iam.gserviceaccount.com', private_key: gaKeys.privateKey.export({ type: 'pkcs8', format: 'pem' }) }) });
   ({ issueFormToken } = await import('../lib/spam.js'));
   const { createDevServer } = await import('../scripts/dev-api.js');
   api = createDevServer();
   await new Promise((ok) => api.listen(0, ok));
   base = `http://127.0.0.1:${api.address().port}`;
 });
-after(() => { api.close(); fake.close(); });
+after(() => { api.close(); fake.close(); google.close(); });
 
 const auth = { Authorization: 'Bearer test-pass' };
 // Company and phone are required, so every test enquiry gets realistic ones unless it sets its own.
@@ -137,4 +173,22 @@ test('admin sheet import replaces the catalogue', async () => {
   assert.equal(r.status, 200); assert.equal(d.total, 98);
   const cat = await (await fetch(base + '/api/courses')).json();
   assert.equal(cat.count, 98); assert.ok(cat.updatedAt);
+});
+
+test('admin analytics: GA4 report for the admin page', async () => {
+  assert.equal((await fetch(base + '/api/admin/analytics')).status, 401);
+  const d = await (await fetch(base + '/api/admin/analytics?days=7', { headers: auth })).json();
+  assert.equal(d.configured, true);
+  assert.deepEqual(gaSeen[0], { ok: true, scope: 'https://www.googleapis.com/auth/analytics.readonly', iss: 'reports@hazdemy.iam.gserviceaccount.com' });
+  assert.deepEqual(d.kpis.users, { now: 120, prev: 100 });
+  assert.deepEqual(d.kpis.pageViews, { now: 640, prev: 500 });
+  assert.deepEqual(d.kpis.leads, { now: 4, prev: 2 });
+  assert.equal(d.daily.length, 7);
+  assert.deepEqual(d.daily.at(-1), { date: new Date().toISOString().slice(0, 10), users: 20, views: 90, leads: 3 });
+  assert.equal(d.daily[0].views, 0); // days with no visits are filled in
+  assert.deepEqual(d.pages[0], { path: '/', views: 300 });
+  assert.deepEqual(d.courses[0], { code: 'HAZ-AT-008', name: 'IBM webMethods Integration v12.1 Developer', views: 33 });
+  assert.equal(d.channels[0].sessions, 70);
+  await fetch(base + '/api/admin/analytics?days=7', { headers: auth });
+  assert.equal(gaSeen.length, 1); // signed in once; the report is cached for a few minutes
 });

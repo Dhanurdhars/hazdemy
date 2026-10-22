@@ -88,7 +88,7 @@ export default function Layout() {
       </footer>
 
       <button className={`totop ${showTop ? 'show' : ''}`} onClick={() => scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Back to top"><Up /></button>
-      <ChatBot />
+      {loc.pathname !== '/admin' && <ChatBot />}
       <CookieConsent />
     </>
   );

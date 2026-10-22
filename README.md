@@ -64,6 +64,18 @@ Add these environment variables, then redeploy:
 4. Page views are recorded as visitors move between pages. This relies on GA4's enhanced measurement setting "Page changes based on browser history events", which is on by default; you'll find it under **Admin → Data streams → your stream → Enhanced measurement**. To check, accept cookies on the live site, click through a few pages, and watch them appear in **Reports → Realtime**.
 5. Each enquiry sent is recorded as a `generate_lead` event. To count enquiries as conversions, open **Admin → Events** in Google Analytics and mark `generate_lead` as a key event.
 
+### Step 6: Optional analytics report in /admin
+
+The **Website analytics** tab in `/admin` shows visitors, page views, enquiries sent, top pages and courses, traffic sources, countries and devices for the last 7, 28 or 90 days. To fill it, give the site read-only access to your GA4 property:
+
+1. In [Google Cloud Console](https://console.cloud.google.com), create or pick a project and enable the **Google Analytics Data API**.
+2. Under **IAM & Admin → Service accounts**, create a service account (it needs no roles), then open **Keys → Add key → JSON**. A key file downloads. Keep it private.
+3. In Google Analytics, open **Admin → Property access management** and add the service account's email (ending in `iam.gserviceaccount.com`) as a **Viewer**.
+4. Copy the **Property ID** (a number, not the `G-…` Measurement ID) from **Admin → Property details**.
+5. In Vercel, add `GA_PROPERTY_ID` (that number) and `GA_SERVICE_ACCOUNT_JSON` (the whole key file, pasted as is), then redeploy.
+
+Until these are set, the tab shows these steps. The numbers include only visitors who allowed analytics cookies, and the server caches them for 5 minutes. **Refresh** fetches fresh numbers.
+
 ### Check that it's working
 
 - Open `https://your-project.vercel.app/api/health`. It should show `"storage":"redis"` and `"admin":true`. The `"mail"` value shows `"ok"` once email is set up.

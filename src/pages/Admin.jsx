@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { PageHead } from '../components/UI';
 import { Download, Key, Reset, Search } from '../components/Icons';
 import { toast } from '../lib/toast';
+import AdminAnalytics from '../components/AdminAnalytics';
 
 const STATUSES = ['new', 'contacted', 'quoted', 'won', 'closed'];
 const TOKEN_KEY = 'hz-admin-token';
@@ -23,6 +24,8 @@ export default function Admin() {
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState('');
   const [importing, setImporting] = useState(false);
+  const [tab, setTab] = useState(() => (window.location.hash === '#analytics' ? 'analytics' : 'enquiries'));
+  const showTab = (t) => { setTab(t); window.history.replaceState(null, '', t === 'analytics' ? '#analytics' : window.location.pathname); };
 
   const api = useCallback(async (path, opts = {}) => {
     const r = await fetch(path, { ...opts, headers: { ...(opts.headers || {}), Authorization: `Bearer ${token}` } });
@@ -89,8 +92,18 @@ export default function Admin() {
 
   return (
     <>
-      <PageHead crumbs={[{ label: 'Admin' }]} title="Enquiries" lead="Every “Ask for details” and contact-form request, newest first." />
+      <PageHead crumbs={[{ label: 'Admin' }]} title={tab === 'analytics' ? 'Website analytics' : 'Enquiries'}
+        lead={tab === 'analytics' ? 'Visitors, pages, courses and enquiries from Google Analytics.' : 'Every “Ask for details” and contact-form request, newest first.'} />
       <div className="wrap wide" style={{ paddingTop: 40, paddingBottom: 96 }}>
+        <div className="adm-head">
+          <div className="tabs" role="tablist" aria-label="Admin sections">
+            {[['enquiries', 'Enquiries'], ['analytics', 'Website analytics']].map(([k, label]) => (
+              <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''} onClick={() => showTab(k)}>{label}</button>
+            ))}
+          </div>
+          <button className="btn btn-ghost sm" onClick={() => setToken('')}>Sign out</button>
+        </div>
+        {tab === 'analytics' ? <AdminAnalytics api={api} /> : (<>
         {sys && (sys.storage !== 'redis' || !sys.mail) && (
           <div className="adm-warn">
             {sys.storage !== 'redis' && <p><b>Storage not connected.</b> Enquiries are only kept temporarily. In Vercel open <b>Storage → Create Database → Upstash Redis</b>, connect it to this project, then redeploy.</p>}
@@ -116,7 +129,6 @@ export default function Admin() {
               {importing ? 'Importing…' : 'Upload course sheet (.xlsx)'}
               <input type="file" accept=".xlsx,.xls" hidden onChange={(e) => importSheet(e.target.files[0])} />
             </label>
-            <button className="btn btn-ghost sm" onClick={() => setToken('')}>Sign out</button>
           </div>
         </div>
         {err && <p role="alert" style={{ color: '#c0262d', margin: '8px 0 16px' }}>{err}</p>}
@@ -136,6 +148,7 @@ export default function Admin() {
             ))}</tbody>
           </table></div>
         )}
+        </>)}
       </div>
     </>
   );
