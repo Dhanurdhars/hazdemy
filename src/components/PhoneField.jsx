@@ -8,7 +8,7 @@ const flagUrl = (code) => FLAGS[`/node_modules/flag-icons/flags/4x3/${code.toLow
 export const Flag = ({ code }) => <img className="flag" src={flagUrl(code)} alt="" width="22" height="16" loading="lazy" />;
 
 /** Country picker (flag + dialling code) beside the telephone number. */
-export default function PhoneField({ id, country, number, onCountry, onNumber }) {
+export default function PhoneField({ id, country, number, onCountry, onNumber, inputProps }) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
   const [active, setActive] = useState(0);
@@ -53,7 +53,7 @@ export default function PhoneField({ id, country, number, onCountry, onNumber })
         <Flag code={c.code} /><span>+{c.dial}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
       </button>
       <input id={id} ref={numRef} type="tel" autoComplete="tel-national" inputMode="tel" placeholder="Phone number"
-        value={number} onChange={(e) => onNumber(e.target.value.replace(/[^\d\s()\-.]/g, ''))} />
+        value={number} onChange={(e) => onNumber(e.target.value.replace(/[^\d\s()\-.]/g, ''))} {...inputProps} />
       {open && (
         <div className="phone-pop">
           <label className="phone-search"><Search /><input ref={(el) => { if (el && !searchRef.current) el.focus({ preventScroll: true }); searchRef.current = el; }} value={q} placeholder="Search country or code"

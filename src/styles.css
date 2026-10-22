@@ -1,6 +1,6 @@
 :root{
   --bg:#fbf7f5; --surface:#ffffff; --surface-2:#f6ebe8; --ink:#2b0a0b; --ink-2:#5f4543; --ink-3:#8f7471;
-  --line:#ecdcd8; --brand:#8e1b1e; --maroon:#4e0405; --brand-2:#e9a23b; --accent:#ff7a45; --ok:#14a36b;
+  --line:#ecdcd8; --brand:#8e1b1e; --maroon:#4e0405; --brand-2:#e9a23b; --accent:#ff7a45; --ok:#14a36b; --danger:#c0262d;
   --hero:#1d0607; --hero-ink:#fff3f1; --hero-ink-2:#dcbcb7;
   --shadow:0 1px 2px rgba(60,12,13,.06),0 8px 28px rgba(60,12,13,.08);
   --radius:18px; --maxw:1200px;
@@ -8,11 +8,11 @@
 }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
   --bg:#140808; --surface:#211010; --surface-2:#2c1616; --ink:#fff3f1; --ink-2:#d9c4c1; --ink-3:#a88f8b;
-  --line:#432424; --brand:#e0574f; --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35); --hero:#130404;
+  --line:#432424; --danger:#ff7b72; --brand:#e0574f; --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35); --hero:#130404;
 }}
 :root[data-theme="dark"]{
   --bg:#140808; --surface:#211010; --surface-2:#2c1616; --ink:#fff3f1; --ink-2:#d9c4c1; --ink-3:#a88f8b;
-  --line:#432424; --brand:#e0574f; --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35); --hero:#130404;
+  --line:#432424; --danger:#ff7b72; --brand:#e0574f; --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35); --hero:#130404;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -648,3 +648,10 @@ section.bot{padding:0}
 .phone-pop .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .phone-pop .dc{color:var(--ink-3);font-variant-numeric:tabular-nums}
 .phone-pop .none{color:var(--ink-3);cursor:default}
+/* field with a problem: red outline + message underneath */
+.field.invalid input,.field.invalid select,.field.invalid textarea,.field.invalid .phone{border-color:var(--danger);background:color-mix(in srgb,var(--danger) 5%,var(--bg))}
+.field.invalid input:focus,.field.invalid textarea:focus,.field.invalid .phone:focus-within{border-color:var(--danger);box-shadow:0 0 0 4px color-mix(in srgb,var(--danger) 16%,transparent)}
+.field.invalid .phone input{background:none}
+.field.invalid .phone input:focus{box-shadow:none}
+.field-err{display:flex;align-items:flex-start;gap:6px;font-size:13px;line-height:1.4;color:var(--danger);font-weight:500;margin-top:-1px}
+.field-err::before{content:"!";flex:none;width:16px;height:16px;margin-top:1px;border-radius:50%;background:var(--danger);color:#fff;font:700 11px/16px var(--f-body);text-align:center}

@@ -114,6 +114,10 @@ test('spam: content, duplicates and per-email limit', async () => {
     { company: 'www.cheap.ru' }, { company: 'Lucky Casino' }, { notes: 'see https://x.io' }, { notes: '<b>hi</b>' }, { notes: 'We sell SEO packages' }, { notes: 'crypto offer' },
   ];
   for (const [i, r] of rejected.entries()) assert.equal(await status({ ...ok, ...r }, `10.0.4.${i}`), 400, JSON.stringify(r));
+  // errors name the field, so the form can outline it
+  for (const [r, field] of [[{ email: 'jose@gmail.com' }, 'email'], [{ last: 'fake' }, 'last'], [{ phone: '0000000' }, 'phone'], [{ notes: 'crypto offer' }, 'notes'], [{ company: 'Lucky Casino' }, 'company']]) {
+    assert.equal((await (await post('/api/enquiries', { ...ok, ...r, token: tok() }, `10.0.6.${field.length}`)).json()).field, field);
+  }
   const accepted = [{ last: 'Doherty' }, { first: 'Ng' }, { email: 'jose@orange.com' }, { phone: '+91 98450 12345' }, { notes: 'Cryptography module, cc bob@northwind.co.uk' }];
   for (const [i, r] of accepted.entries()) assert.equal(await status({ ...ok, ...r, email: r.email || `jose${i}@northwind-traders.com` }, `10.0.5.${i}`), 201, JSON.stringify(r));
   const before = (await listEnquiries()).length;

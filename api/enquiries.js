@@ -26,9 +26,9 @@ export default async function handler(req, res) {
     if (!token.ok) return send(res, 400, { error: 'This form has expired — please reload the page and try again.' });
 
     const check = validateEnquiry(body);
-    if (!check.ok) return send(res, 400, { error: check.error });
+    if (!check.ok) return send(res, 400, { error: check.error, field: check.field });
     const v = check.value;
-    if (!(await emailDomainOk(v.email))) return send(res, 400, { error: 'That email domain cannot receive mail — please check your email address.' });
+    if (!(await emailDomainOk(v.email))) return send(res, 400, { error: 'That email domain cannot receive mail — please check your email address.', field: 'email' });
 
     // Nowhere to deliver it? Tell the browser so it can fall back to the visitor's email app.
     if (storageKind() === 'memory' && !mailEnabled()) return send(res, 503, { error: 'Online enquiries are not set up yet.' });
