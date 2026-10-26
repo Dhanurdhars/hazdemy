@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { AREAS, COURSES, LEVELS, TRACKS } from '../data/catalog';
 import { dur, coursePath } from '../lib/format';
 import { CTA, LevelBars, PageHead } from '../components/UI';
-import { AreaIcon } from '../components/Icons';
+import { AreaIcon, Download } from '../components/Icons';
 import { observeReveals } from '../lib/effects';
 
 export default function Paths() {
@@ -18,7 +18,11 @@ export default function Paths() {
   return (
     <>
       <PageHead crumbs={[{ label: 'Learning Paths' }]} title="Learning paths by role"
-        lead="Three role-based tracks — Builders, Operators and Leaders — each laddered from Foundation to Advanced within every technology area." />
+        lead="Three role-based tracks — Builders, Operators and Leaders — each laddered from Foundation to Advanced within every technology area.">
+        <div className="hero-actions">
+          <a className="btn btn-light" href="/downloads/ibm-watsonx-learning-paths.pdf" download="IBM watsonx Learning Paths.pdf"><Download /> Download IBM watsonx learning paths (PDF)</a>
+        </div>
+      </PageHead>
       <section style={{ paddingTop: 56 }}><div className="wrap">
         <div className="tabs">
           {Object.entries(TRACKS).map(([k, x]) => (
