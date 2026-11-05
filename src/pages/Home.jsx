@@ -31,7 +31,7 @@ export default function Home() {
         <div className="wrap">
           <div className="hero-grid">
             <div>
-              <span className="pill reveal"><b>New</b> watsonx.ai &amp; watsonx.data administration courses</span>
+              <span className="pill reveal"><b>New</b><span>watsonx.ai &amp; watsonx.data administration courses</span></span>
               <h1 className="reveal"><span className="ln">Empowering minds.</span><span className="ln">Enabling futures.</span></h1>
               <p className="sub reveal">Hands-on training in <span className="rotator">{ROTATE.map((w) => <span key={w} className="grad">{w}</span>)}</span></p>
               <p className="lead reveal">Training designed around real delivery. Hazdemy takes your teams from fundamentals to applied, production-ready skills across the IBM technology portfolio — with labs, mentorship and capstones that produce working results.</p>

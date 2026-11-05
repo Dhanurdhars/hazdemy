@@ -1,4 +1,4 @@
-import { LEVELS } from '../data/catalog';
+import { LEVELS, UPCOMING_CLASS as K, classOpen } from '../data/catalog';
 
 export const esc = (s) =>
   String(s ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
@@ -21,8 +21,13 @@ export const lvlBarsHtml = (l) => {
   return `<span class="lvl" aria-hidden="true">${[1, 2, 3].map((i) => `<i class="${i <= n ? 'on' : ''}"></i>`).join('')}</span>`;
 };
 
+// Names the scheduled public class too, until its last day has ended.
+const classLine = (c) =>
+  c.code === K.code && classOpen()
+    ? `\nUpcoming class: ${K.when}, ${K.hours} · Instructor: ${K.instructor}` : '';
+
 export const subjectFor = (c) =>
-  c ? `I would like details and pricing for this course:\n${c.name}, Course Code: ${c.code}\nPlease send delivery options, availability, and a quote.` : '';
+  c ? `I would like details and pricing for this course:\n${c.name}, Course Code: ${c.code}${classLine(c)}\nPlease send delivery options, availability, and a quote.` : '';
 
 export const askPath = (c) => `/contact?course=${encodeURIComponent(c.code)}`;
 export const coursePath = (c) => `/course/${encodeURIComponent(c.code)}`;

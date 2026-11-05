@@ -1,6 +1,6 @@
 // Haz course-advisor engine: intent parsing, fuzzy course search, guided flow, FAQ and comparisons.
 // UI-agnostic — the React component supplies `say(html, chips, cls)` and `navigate(path)`.
-import { AREAS, LEVELS, TRACKS, COURSES, byCode, count } from '../data/catalog';
+import { AREAS, LEVELS, TRACKS, COURSES, UPCOMING_CLASS as K, byCode, classOpen, count } from '../data/catalog';
 import { esc, dur, hours, lvlBarsHtml as lvlBars } from '../lib/format';
 
 export function createEngine({ say, navigate }) {
@@ -139,13 +139,31 @@ const FAQ=[
   [/\b(areas|categories|topics|what do you (teach|offer)|catalog|catalogue|all courses|browse)\b/i,()=>say(`We teach across ${Object.keys(AREAS).length} areas:<ul>${Object.keys(AREAS).map(a=>`<li><b>${a}</b> — ${count('area',a)} courses</li>`).join('')}</ul>`,Object.keys(AREAS))],
   [/\b(levels?|difficulty)\b/i,()=>say(`Courses are tagged <b>Foundation</b> (${count('level','Foundation')}), <b>Intermediate</b> (${count('level','Intermediate')}) and <b>Advanced</b> (${count('level','Advanced')}). Every course page lists prerequisites.`,['Foundation courses','Advanced courses'])],
 ];
-function help(){return say(`I'm <b>Haz</b>, Hazdemy's course advisor. I can:<ul><li>Find courses — <i>"DataStage for beginners"</i>, <i>"Guardium under 3 days"</i></li><li>Recommend a path for your role</li><li>Explain prerequisites and who a course is for</li><li>Compare courses — <i>"compare HAZ-CG-ADM and HAZ-CG-ARB"</i></li><li>Connect you to our team for details and pricing</li></ul>`,['Help me choose','Browse all areas','Short courses','Get details'])}
+/* ---------- scheduled public class ---------- */
+const UPCOMING=/\b(upcoming|next (class|batch|session|training|course)|public (class|training|session)|(class|training|course) (dates?|schedule|calendar|timings?)|schedule[ds]? (class|training)|when (is|does|will)\b.*\b(class|training|batch|start)|enrol+(ment)?|instructor|trainer|who (is )?(teach|teaching|running)|live class)/i;
+function classWhen(){
+  const now=Date.now();
+  for(let i=0;i<K.days.length;i++){const s=K.days[i];if(now<s){const d=Math.floor((s-now)/864e5),h=Math.floor((s-now)/36e5)%24;return (i?`Day ${i+1} starts`:'Starts')+` in <b>${d?`${d} day${d>1?'s':''}${h?`, ${h} hr${h>1?'s':''}`:''}`:`${Math.max(1,Math.ceil((s-now)/36e5))} hr`}</b>`}if(now<s+K.dayLength)return `<b>Live now</b> — day ${i+1} of ${K.days.length}`}
+  return '';
+}
+function upcoming(){
+  if(!classOpen())return say("There's no public class scheduled right now — but we run private sessions on any course, on your dates.",['Help me choose','Contact the team']);
+  const c=byCode[K.code];if(c)st.ctx=c;const a=c?AREAS[c.area]||AREAS.Data:AREAS.Data;
+  return say(`<div class="bc" style="--c:${a.c}"><div class="t"><span>📅 Upcoming training</span><span>${esc(K.code)}</span></div><h5>${esc(K.name)}</h5>
+  <ul class="bc-sched"><li><b>Dates:</b> ${esc(K.when)}</li><li><b>Time:</b> ${esc(K.hours)}, daily</li><li><b>Instructor:</b> ${esc(K.instructor)}</li></ul>
+  <p style="margin-top:6px;font-size:13px">⏳ ${classWhen()}</p>
+  <div class="a"><a data-link href="/course/${encodeURIComponent(K.code)}" data-close>Course page</a><a class="pri" data-link href="/contact?course=${encodeURIComponent(K.code)}" data-close>Enroll</a></div></div>`,['Prerequisites?','Who should attend?','Get details'],'wide');
+}
+const classChip=()=>classOpen()?['Upcoming training']:[];
+
+function help(){return say(`I'm <b>Haz</b>, Hazdemy's course advisor. I can:<ul><li>Find courses — <i>"DataStage for beginners"</i>, <i>"Guardium under 3 days"</i></li><li>Recommend a path for your role</li><li>Explain prerequisites and who a course is for</li><li>Compare courses — <i>"compare HAZ-CG-ADM and HAZ-CG-ARB"</i></li><li>Show upcoming public training — dates, times and instructor</li><li>Connect you to our team for details and pricing</li></ul>`,[...classChip(),'Help me choose','Browse all areas','Get details'])}
 
 /* ---------- brain ---------- */
 function reply(raw){
   const q=raw.trim();if(!q)return;
   const lq=norm(q);
   if(st.flow&&!/^(start over|reset|cancel)$/i.test(q))return flowStep(q);
+  if(UPCOMING.test(q)||st.ctx?.code===K.code&&/\b(when|dates?|schedule|timings?|what time|start)\b/i.test(q))return upcoming();
   if(/^(hi|hello|hey|hii+|hola|namaste|good (morning|afternoon|evening)|yo)\b/i.test(q)&&q.split(' ').length<=4)return say(`Hi there! 👋 What would you like to learn? You can name a product, a skill or your role.`,['Help me choose','Browse all areas','Get details']);
   if(/^(thanks|thank you|thx|ty|great|awesome|perfect|cool|ok|okay)\b/i.test(q))return say("You're welcome! Anything else I can help you find?",['Help me choose','Contact the team']);
   if(/^(start over|reset|restart|clear|cancel)$/i.test(q)){st.ctx=null;st.last=[];st.flow=null;return say("Fresh start. What are you looking for?",['Help me choose','Browse all areas'])}
@@ -195,8 +213,10 @@ function reply(raw){
 
 function greet(path=''){
   const m=path.match(/\/course\/([^?/]+)/);const c=m&&byCode[decodeURIComponent(m[1])];
+  const live=classOpen();
+  if(c&&c.code===K.code&&live){st.ctx=c;return say(`Hi! I'm <b>Haz</b>. <b>${esc(c.name)}</b> has a public class coming up — <b>${esc(K.dates)}</b>, ${esc(K.hours)}, with ${esc(K.instructor)}. Want the schedule, prerequisites or who it's for?`,['Class schedule','Prerequisites?','Who should attend?','Get details'])}
   if(c){st.ctx=c;return say(`Hi! I'm <b>Haz</b>. I see you're looking at <b>${esc(c.name)}</b>. Want the prerequisites, who it's for, or full details?`,['Prerequisites?','Who should attend?','Similar courses','Get details'])}
-  return say(`Hi! I'm <b>Haz</b>, Hazdemy's course advisor 👋<br>Tell me what you'd like to learn — a product, a skill or your role — and I'll find the right course from our ${COURSES.length}.`,['Help me choose','Browse all areas','Short courses','Get details']);
+  return say(`Hi! I'm <b>Haz</b>, Hazdemy's course advisor 👋<br>Tell me what you'd like to learn — a product, a skill or your role — and I'll find the right course from our ${COURSES.length}.${live?`<br><br>📅 <b>Upcoming training:</b> ${esc(K.name)} · ${esc(K.dates)} with ${esc(K.instructor)}`:''}`,[...classChip(),'Help me choose','Browse all areas','Get details']);
 }
 
 return { reply, greet, state: st };

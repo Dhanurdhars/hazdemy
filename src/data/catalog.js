@@ -66,3 +66,18 @@ export const COMPANY = {
   address: '251 Little Falls Drive, Wilmington, Delaware 19808',
   stats: { satisfaction: 98, solutions: 3000, instructors: 750 },
 };
+
+// Scheduled public class, announced in the bar above the header on every page until it ends.
+// Times are UTC: 7 am–3 pm US Eastern (EST, UTC−5) each day.
+export const UPCOMING_CLASS = {
+  code: 'HAZ-AT-008',
+  name: 'IBM webMethods Integration v12.1 Developer',
+  instructor: 'Megan Irvine',
+  dates: 'Nov 16–18',
+  when: 'Mon, Nov 16 – Wed, Nov 18, 2026',
+  hours: '7 am–3 pm US EST',
+  days: [Date.UTC(2026, 10, 16, 12), Date.UTC(2026, 10, 17, 12), Date.UTC(2026, 10, 18, 12)],
+  dayLength: 8 * 3600e3,
+};
+/** True until the scheduled class's last day has ended. */
+export const classOpen = (now = Date.now()) => now < UPCOMING_CLASS.days[UPCOMING_CLASS.days.length - 1] + UPCOMING_CLASS.dayLength;

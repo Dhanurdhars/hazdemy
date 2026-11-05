@@ -141,7 +141,7 @@ export default function Contact() {
                 ))}
               </select>
             </div>
-            <div className={fieldCls('subject')}><label htmlFor="f-subj">Subject</label><textarea id="f-subj" rows={3} className={flash ? 'flash' : ''} placeholder="What would you like to know?" required value={v.subject} onChange={set('subject')} {...aria('subject')} /><Err k="subject" /></div>
+            <div className={fieldCls('subject')}><label htmlFor="f-subj">Subject</label><textarea id="f-subj" rows={4} className={flash ? 'flash' : ''} placeholder="What would you like to know?" required value={v.subject} onChange={set('subject')} {...aria('subject')} /><Err k="subject" /></div>
             <div className={fieldCls('notes')}><label htmlFor="f-msg">Additional notes <span style={{ fontWeight: 500, color: 'var(--ink-3)' }}>(optional)</span></label><textarea id="f-msg" style={{ minHeight: 90 }} placeholder="Preferred dates, location, number of learners…" value={v.notes} onChange={set('notes')} {...aria('notes')} /><Err k="notes" /></div>
             {/* honeypot: hidden from people, bots fill it in */}
             <input type="text" name="website" tabIndex={-1} autoComplete="off" value={v.website} onChange={set('website')} style={{ position: 'absolute', left: '-9999px' }} aria-hidden="true" />

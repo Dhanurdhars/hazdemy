@@ -5,6 +5,7 @@ import { Logo } from './UI';
 import { Menu, Moon, Up } from './Icons';
 import ChatBot from '../bot/ChatBot';
 import CookieConsent from './CookieConsent';
+import ClassBanner from './ClassBanner';
 import { openCookieSettings } from '../lib/consent';
 import { bindTilt, observeReveals } from '../lib/effects';
 import { updateHead } from '../lib/head';
@@ -53,6 +54,7 @@ export default function Layout() {
   return (
     <>
       <div className="progress" style={{ width: progress + '%' }} />
+      {loc.pathname !== '/admin' && <ClassBanner />}
       <header className={`hdr ${loc.pathname === '/' ? 'on-light' : 'on-dark'} ${solid ? 'solid' : ''}`}>
         <div className="wrap">
           <Logo />
