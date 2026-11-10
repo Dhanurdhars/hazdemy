@@ -67,17 +67,31 @@ export const COMPANY = {
   stats: { satisfaction: 98, solutions: 3000, instructors: 750 },
 };
 
-// Scheduled public class, announced in the bar above the header on every page until it ends.
-// Times are UTC: 7 am–3 pm US Eastern (EST, UTC−5) each day.
-export const UPCOMING_CLASS = {
-  code: 'HAZ-AT-008',
-  name: 'IBM webMethods Integration v12.1 Developer',
-  instructor: 'Megan Irvine',
-  dates: 'Nov 16–18',
-  when: 'Mon, Nov 16 – Wed, Nov 18, 2026',
-  hours: '7 am–3 pm US EST',
-  days: [Date.UTC(2026, 10, 16, 12), Date.UTC(2026, 10, 17, 12), Date.UTC(2026, 10, 18, 12)],
-  dayLength: 8 * 3600e3,
+// Public virtual classes, in date order. Each is announced (banner, course page, catalog, chatbot) until its last day ends.
+// `start` is the first day's start in UTC; the class runs the same hours on `days` consecutive days.
+// US Eastern is EST (UTC−5) and Central European is CET (UTC+1) for all of these dates.
+const ZONES = { EST: 'America/New_York', CET: 'Europe/Berlin' };
+const session = (code, name, ibm, start, hrs, time, tz, instructor) => {
+  const zone = ZONES[tz], dayLength = hrs * 3600e3;
+  const days = [0, 1, 2].map((i) => start + i * 864e5);
+  const md = (t, o) => new Intl.DateTimeFormat('en-US', { timeZone: zone, ...o }).format(t);
+  const [first, last] = [days[0], days[days.length - 1]];
+  const sameMonth = md(first, { month: 'short' }) === md(last, { month: 'short' });
+  return {
+    id: `${code}-${new Date(first).toISOString().slice(0, 10)}`, code, ibm, name, instructor,
+    days, dayLength, hrs, zone, end: last + dayLength,
+    hours: `${time} ${tz}`,
+    dates: sameMonth ? `${md(first, { month: 'short', day: 'numeric' })}–${md(last, { day: 'numeric' })}` : `${md(first, { month: 'short', day: 'numeric' })} – ${md(last, { month: 'short', day: 'numeric' })}`,
+    when: `${md(first, { weekday: 'short', month: 'short', day: 'numeric' })} – ${md(last, { weekday: 'short', month: 'short', day: 'numeric' })}, ${md(last, { year: 'numeric' })}`,
+  };
 };
-/** True until the scheduled class's last day has ended. */
-export const classOpen = (now = Date.now()) => now < UPCOMING_CLASS.days[UPCOMING_CLASS.days.length - 1] + UPCOMING_CLASS.dayLength;
+export const SESSIONS = [
+  session('HAZ-AT-008', 'IBM webMethods Integration v12.1 Developer', 'V010037G', Date.UTC(2026, 10, 16, 12), 8, '7 am–3 pm', 'EST', 'Megan Irvine'),
+  session('HAZ-DA-0009', 'InfoSphere DataStage 11.7 Developers', 'V010009G', Date.UTC(2026, 10, 23, 7), 5, '8 am–1 pm', 'CET'),
+  session('HAZ-DA-0001', 'IBM DataStage NextGen on IBM Cloud Pak for Data', 'V010001G', Date.UTC(2026, 10, 30, 12), 5, '7 am–12 pm', 'EST'),
+  session('HAZ-AT-008', 'IBM webMethods Integration v12.1 Developer', 'V010037G', Date.UTC(2026, 11, 7, 12), 8, '1 pm–9 pm', 'CET'),
+  session('HAZ-DA-0009', 'InfoSphere DataStage 11.7 Developers', 'V010009G', Date.UTC(2026, 11, 7, 7), 5, '8 am–1 pm', 'CET'),
+];
+export const bySession = Object.fromEntries(SESSIONS.map((s) => [s.id, s]));
+/** Sessions not yet over, optionally only those of one course. */
+export const openSessions = (code, now = Date.now()) => SESSIONS.filter((s) => now < s.end && (!code || s.code === code));

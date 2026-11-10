@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
-import { AREAS, COMPANY, COURSES, byCode } from '../data/catalog';
+import { AREAS, COMPANY, COURSES, byCode, bySession } from '../data/catalog';
 import { subjectFor } from '../lib/format';
 import { PageHead } from '../components/UI';
 import { Arrow, Chat, Check, Mail, Pin } from '../components/Icons';
@@ -29,7 +29,8 @@ export default function Contact() {
   const loc = useLocation();
   const pre = params.get('course') && byCode[params.get('course')] ? params.get('course') : '';
   const priv = params.get('type') === 'private';
-  const [v, setV] = useState({ ...EMPTY, course: pre, subject: subjectFor(byCode[pre]), notes: priv ? 'We are interested in a private session for our team.' : '' });
+  const cls = bySession[params.get('class')]?.code === pre ? bySession[params.get('class')] : undefined; // an "Enroll" link for one public class
+  const [v, setV] = useState({ ...EMPTY, course: pre, subject: subjectFor(byCode[pre], cls), notes: priv ? 'We are interested in a private session for our team.' : '' });
   const [status, setStatus] = useState('idle'); // idle | sending | sent | error
   const [error, setError] = useState('');
   const [flash, setFlash] = useState(Boolean(pre));
@@ -45,7 +46,7 @@ export default function Contact() {
 
   // arriving from an "Ask for details" button: refill, scroll to the form, highlight, focus
   useEffect(() => {
-    setV((s) => ({ ...s, course: pre, subject: pre ? subjectFor(byCode[pre]) : s.subject, notes: priv ? 'We are interested in a private session for our team.' : s.notes }));
+    setV((s) => ({ ...s, course: pre, subject: pre ? subjectFor(byCode[pre], cls) : s.subject, notes: priv ? 'We are interested in a private session for our team.' : s.notes }));
     setStatus('idle');
     if (pre) {
       setFlash(true);
@@ -54,7 +55,7 @@ export default function Contact() {
       return () => { clearTimeout(t); clearTimeout(f); };
     }
     if (loc.hash === '#faq') setTimeout(() => document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' }), 200);
-  }, [pre, priv, loc.hash]);
+  }, [pre, cls, priv, loc.hash]);
 
   // A problem with one field: red outline on it and the message right below it; cleared once that field is edited.
   const [bad, setBad] = useState(null); // { field, msg }

@@ -1,4 +1,4 @@
-import { LEVELS, UPCOMING_CLASS as K, classOpen } from '../data/catalog';
+import { LEVELS, openSessions } from '../data/catalog';
 
 export const esc = (s) =>
   String(s ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
@@ -21,13 +21,16 @@ export const lvlBarsHtml = (l) => {
   return `<span class="lvl" aria-hidden="true">${[1, 2, 3].map((i) => `<i class="${i <= n ? 'on' : ''}"></i>`).join('')}</span>`;
 };
 
-// Names the scheduled public class too, until its last day has ended.
-const classLine = (c) =>
-  c.code === K.code && classOpen()
-    ? `\nUpcoming class: ${K.when}, ${K.hours} · Instructor: ${K.instructor}` : '';
+// Names the chosen public class, or else the course's upcoming public classes.
+const classLine = (c, s) => {
+  if (s) return `\nPublic virtual class: ${s.when}, ${s.hours}${s.instructor ? ` · Instructor: ${s.instructor}` : ''}`;
+  const open = openSessions(c.code);
+  return open.length ? `\nUpcoming public classes: ${open.map((x) => `${x.dates} (${x.hours})`).join('; ')}` : '';
+};
 
-export const subjectFor = (c) =>
-  c ? `I would like details and pricing for this course:\n${c.name}, Course Code: ${c.code}${classLine(c)}\nPlease send delivery options, availability, and a quote.` : '';
+export const subjectFor = (c, s) =>
+  c ? `I would like details and pricing for this course:\n${c.name}, Course Code: ${c.code}${classLine(c, s)}\nPlease send delivery options, availability, and a quote.` : '';
 
-export const askPath = (c) => `/contact?course=${encodeURIComponent(c.code)}`;
+/** Contact form link for a course, optionally for one public class (`s`, a session). */
+export const askPath = (c, s) => `/contact?course=${encodeURIComponent(c.code)}${s ? `&class=${encodeURIComponent(s.id)}` : ''}`;
 export const coursePath = (c) => `/course/${encodeURIComponent(c.code)}`;

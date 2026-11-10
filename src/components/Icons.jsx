@@ -28,6 +28,8 @@ export const Grid = (p) => <S {...p}><rect x="3" y="3" width="7" height="7" rx="
 export const Download = (p) => <S {...p}><path d="M12 3v12M7 10l5 5 5-5M4 19h16" /></S>;
 export const Moon = (p) => <S {...p}><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></S>;
 export const Menu = (p) => <S {...p}><path d="M4 7h16M4 12h16M4 17h16" /></S>;
+export const Prev = (p) => <S sw={2.2} {...p}><path d="M15 6l-6 6 6 6" /></S>;
+export const Next = (p) => <S sw={2.2} {...p}><path d="M9 6l6 6-6 6" /></S>;
 export const Up = (p) => <S sw={2.2} {...p}><path d="M12 19V5M5 12l7-7 7 7" /></S>;
 export const Close = (p) => <S sw={2.4} {...p}><path d="M6 6l12 12M18 6L6 18" /></S>;
 export const Minus = (p) => <S sw={2.2} {...p}><path d="M6 12h12" /></S>;

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AREAS, COURSES, PRODUCTS, byCode, count } from '../data/catalog';
-import { AreaIcon, Arrow } from '../components/Icons';
+import { AREAS, COURSES, PRODUCTS, byCode, count, openSessions } from '../data/catalog';
+import { AreaIcon, Arrow, Clock } from '../components/Icons';
 import { CourseCard, CTA } from '../components/UI';
 import { initGlobe } from '../components/globeScene';
 import { Offerings, TrackCards } from './shared';
@@ -21,6 +21,7 @@ function GlobeScene() {
 export default function Home() {
   const nav = useNavigate();
   const [q, setQ] = useState('');
+  const classes = openSessions();
   const featured = ['HAZ-AT-008', 'HAZ-DA-0048', 'HAZ-DA-0049'].map((k) => byCode[k]).filter(Boolean);
   const feat = [...featured, ...COURSES.filter((c) => c.level === 'Advanced' && !featured.includes(c))].slice(0, 6);
 
@@ -39,6 +40,11 @@ export default function Home() {
                 <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={`Search ${COURSES.length} courses — e.g. DataStage, Maximo, Guardium`} aria-label="Search courses" />
                 <button className="btn btn-primary" type="submit">Search</button>
               </form>
+              {classes.length > 0 && (
+                <Link className="btn hero-classes reveal" to="/training#public-classes">
+                  <Clock />Public classroom courses<Arrow />
+                </Link>
+              )}
               <div className="hero-tags reveal">Popular: {['DataStage', 'Cloud Pak for Data', 'Maximo', 'Cognos', 'Guardium'].map((t) => <Link key={t} to={`/training?q=${encodeURIComponent(t)}`}>{t}</Link>)}</div>
             </div>
             <GlobeScene />

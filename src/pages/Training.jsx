@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { AREAS, COURSES, LEVELS, TRACKS, count, areaOf } from '../data/catalog';
-import { hours, coursePath } from '../lib/format';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { AREAS, COURSES, LEVELS, TRACKS, count, areaOf, openSessions } from '../data/catalog';
+import { hours, askPath, coursePath } from '../lib/format';
 import { AskButton, CourseCard, LevelBars, PageHead } from '../components/UI';
-import { Arrow, Download, Grid, Search, Table } from '../components/Icons';
+import { Arrow, Clock, Download, Grid, Search, Table } from '../components/Icons';
 import { toast } from '../lib/toast';
 
 // Columns mirror the green columns of the course sheet (Pre Reqs / Persona live on each course page)
@@ -44,12 +44,46 @@ function Chips({ value, onChange, options }) {
   );
 }
 
+const monthName = (t) => new Date(t).toLocaleString('en-US', { month: 'long', timeZone: 'UTC' });
+
+/** Announcement of the upcoming public virtual classes, until the last one ends. */
+function VirtualClasses() {
+  const list = openSessions();
+  if (!list.length) return null;
+  const now = monthName(Date.now());
+  const months = [...new Set(list.map((s) => monthName(s.days[0])))].map((m) => (m === now ? 'this month' : `in ${m}`));
+  return (
+    <section className="vclass reveal" id="public-classes" aria-labelledby="vclass-h">
+      <div className="vclass-head">
+        <span className="eyebrow">Live virtual classes</span>
+        <h2 id="vclass-h">Join a public virtual class {months.join(' and ')}</h2>
+        <p>Instructor-led online classes open to individuals and small teams. Pick a date and enroll — we will confirm your seat and send joining details.</p>
+      </div>
+      <ul className="vclass-list">{list.map((s) => (
+        <li key={s.id}>
+          <span className="vd"><b>{s.dates}</b><small>{s.days.length} days</small></span>
+          <span className="vn"><Link to={coursePath(s)}>{s.name}</Link><small>{s.code} · IBM {s.ibm}{s.instructor && ` · with ${s.instructor}`}</small></span>
+          <span className="vt"><Clock />{s.hours}</span>
+          <Link className="btn btn-primary sm" to={askPath(s, s)}>Enroll <Arrow /></Link>
+        </li>
+      ))}</ul>
+    </section>
+  );
+}
+
 export default function Training() {
   const [params] = useSearchParams();
+  const loc = useLocation();
   const [f, setF] = useState({ q: '', area: '', level: '', dur: '', track: '' });
   const [sort, setSort] = useState({ k: 'code', dir: 1 });
   const [view, setView] = useState(() => { try { return localStorage.getItem('hz-view') || 'table'; } catch { return 'table'; } });
 
+  // Arriving from the home page's "Public classroom courses" button (after Layout's scroll to top).
+  useEffect(() => {
+    if (loc.hash !== '#public-classes') return;
+    const t = setTimeout(() => document.getElementById('public-classes')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+    return () => clearTimeout(t);
+  }, [loc.hash]);
   useEffect(() => {
     setF({ q: params.get('q') || '', area: params.get('area') || '', level: params.get('level') || '', dur: '', track: params.get('t') || '' });
   }, [params]);
@@ -80,7 +114,7 @@ export default function Training() {
     <>
       <PageHead crumbs={[{ label: 'Training' }]} title="Training catalog"
         lead={`${COURSES.length} instructor-led courses from the Hazdemy course directory — with product, course code, duration, description and skill level for every course.`} />
-      <div className="wrap wide"><div className="catalog">
+      <div className="wrap wide"><VirtualClasses /><div className="catalog">
         <div className="fpanel reveal">
           <label className="search"><Search /><input value={f.q} onChange={(e) => set('q')(e.target.value)} placeholder="Search by product, course code, name, description or persona" /></label>
           <div className="fgrid">
