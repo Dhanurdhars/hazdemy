@@ -95,12 +95,12 @@ const ZOOM_AT013_NOV19 = 'https://us06web.zoom.us/meeting/register/27DnIfxhQ-SWi
 const ZOOM_AT013_NOV24 = 'https://us06web.zoom.us/meeting/register/aTNztq3BS4ij1Bnyd2qFJA';
 export const SESSIONS = [
   session('HAZ-AT-008', 'IBM webMethods Integration v12.1 Developer', 'V010037G', Date.UTC(2026, 10, 16, 12), 8, '7 am–3 pm', 'EST', 'Megan Irvine'),
-  session(...AT013, Date.UTC(2026, 10, 19, 15), 1, '10–11 am', 'EST', '', { days: 1, free: true, register: ZOOM_AT013_NOV19 }),
-  session('HAZ-DA-0009', 'InfoSphere DataStage 11.7 Developers', 'V010009G', Date.UTC(2026, 10, 23, 7), 5, '8 am–1 pm', 'CET'),
-  session(...AT013, Date.UTC(2026, 10, 24, 12), 1, '7–8 am', 'EST', '', { days: 1, free: true, register: ZOOM_AT013_NOV24 }),
-  session('HAZ-DA-0001', 'IBM DataStage NextGen on IBM Cloud Pak for Data', 'V010001G', Date.UTC(2026, 10, 30, 12), 5, '7 am–12 pm', 'EST'),
-  session('HAZ-AT-008', 'IBM webMethods Integration v12.1 Developer', 'V010037G', Date.UTC(2026, 11, 7, 12), 8, '1 pm–9 pm', 'CET'),
-  session('HAZ-DA-0009', 'InfoSphere DataStage 11.7 Developers', 'V010009G', Date.UTC(2026, 11, 7, 7), 5, '8 am–1 pm', 'CET'),
+  session(...AT013, Date.UTC(2026, 10, 19, 15), 1, '10–11 am', 'EST', 'Megan Irvine', { days: 1, free: true, register: ZOOM_AT013_NOV19 }),
+  session('HAZ-DA-0009', 'InfoSphere DataStage 11.7 Developers', 'V010009G', Date.UTC(2026, 10, 23, 7), 5, '8 am–1 pm', 'CET', 'Praveen Chinthala'),
+  session(...AT013, Date.UTC(2026, 10, 24, 12), 1, '7–8 am', 'EST', 'Megan Irvine', { days: 1, free: true, register: ZOOM_AT013_NOV24 }),
+  session('HAZ-DA-0001', 'IBM DataStage NextGen on IBM Cloud Pak for Data', 'V010001G', Date.UTC(2026, 10, 30, 12), 5, '7 am–12 pm', 'EST', 'Praveen Chinthala'),
+  session('HAZ-AT-008', 'IBM webMethods Integration v12.1 Developer', 'V010037G', Date.UTC(2026, 11, 7, 12), 8, '1 pm–9 pm', 'CET', 'Megan Irvine'),
+  session('HAZ-DA-0009', 'InfoSphere DataStage 11.7 Developers', 'V010009G', Date.UTC(2026, 11, 7, 7), 5, '8 am–1 pm', 'CET', 'Praveen Chinthala'),
 ];
 export const bySession = Object.fromEntries(SESSIONS.map((s) => [s.id, s]));
 /** Sessions not yet over, optionally only those of one course. */
