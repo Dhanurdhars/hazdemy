@@ -859,6 +859,25 @@ section.bot{padding:0}
 @media (max-width:640px){.pill.free-stamp{align-items:center;padding:4px 14px 4px 4px}.pill.free-stamp>span{white-space:normal}}
 @media (prefers-reduced-motion:reduce){.free-stamp .stamp{transition:none}}
 /* home hero: less room above the Free badge and between it and the heading */
-.hero:has(.free-stamp){padding-top:112px}
+.hero:has(.free-stamp){padding-top:132px}
 .hero .free-stamp+h1{margin-top:12px}
-@media (max-width:760px){.hero:has(.free-stamp){padding-top:96px}}
+@media (max-width:760px){.hero:has(.free-stamp){padding-top:112px}}
+/* home hero: a band of light passes slowly across the Free badge, and the seal glows as it passes */
+.pill.free-stamp{position:relative;isolation:isolate}
+.pill.free-stamp::after{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(105deg,transparent 42%,rgba(255,255,255,.95) 50%,rgba(247,207,122,.55) 54%,transparent 62%) no-repeat;
+  background-size:300% 100%;background-position:150% 0;animation:pass-light 7s ease-in-out infinite}
+.pill.free-stamp>span{position:relative}
+.free-stamp .stamp{position:relative;z-index:1;animation:seal-shine 7s ease-in-out infinite}
+@keyframes pass-light{0%{background-position:150% 0}70%,100%{background-position:-50% 0}}
+@keyframes seal-shine{0%,6%,30%,100%{filter:drop-shadow(0 0 6px rgba(179,38,42,.55)) drop-shadow(0 5px 10px rgba(78,4,5,.3))}
+  16%{filter:drop-shadow(0 0 12px rgba(247,207,122,.95)) drop-shadow(0 5px 10px rgba(78,4,5,.3)) brightness(1.15)}}
+@media (prefers-reduced-motion:reduce){.pill.free-stamp::after,.free-stamp .stamp{animation:none}}
+/* home hero: frosted-glass Free badge (beats the hero pill styles in both themes) */
+.hero .pill.free-stamp{
+  background:linear-gradient(135deg,rgba(255,255,255,.72),rgba(255,255,255,.32))!important;
+  border:1px solid rgba(255,255,255,.85)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),inset 0 -1px 0 rgba(142,27,30,.06),0 10px 30px -10px rgba(78,4,5,.22),0 2px 6px rgba(78,4,5,.06)!important;
+  -webkit-backdrop-filter:blur(14px) saturate(160%);backdrop-filter:blur(14px) saturate(160%)}
+:root[data-theme="dark"] .hero .pill.free-stamp{background:linear-gradient(135deg,rgba(255,255,255,.14),rgba(255,255,255,.04))!important;border-color:rgba(255,255,255,.22)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 10px 30px -10px rgba(0,0,0,.6)!important}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .hero .pill.free-stamp{background:linear-gradient(135deg,rgba(255,255,255,.14),rgba(255,255,255,.04))!important;border-color:rgba(255,255,255,.22)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 10px 30px -10px rgba(0,0,0,.6)!important}}
