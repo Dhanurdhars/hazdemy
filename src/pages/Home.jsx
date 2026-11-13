@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { AREAS, COURSES, PRODUCTS, byCode, count, openSessions } from '../data/catalog';
 import { AreaIcon, Arrow, Clock } from '../components/Icons';
 import { CourseCard, CTA } from '../components/UI';
+import Stamp from '../components/Stamp';
 import { initGlobe } from '../components/globeScene';
 import { Offerings, TrackCards } from './shared';
 
@@ -34,7 +35,7 @@ export default function Home() {
           <div className="hero-grid">
             <div>
               {freeNext
-                ? <Link className="pill reveal" to="/training#free-classes"><b>Free</b><span>{freeNext.name} · {classes.filter((s) => s.free).map((s) => s.dates).join(' & ')}</span></Link>
+                ? <Link className="pill free-stamp reveal" to="/training#free-classes" title="See the free live classes"><Stamp word="FREE" /><span>{freeNext.name} · {classes.filter((s) => s.free).map((s) => s.dates).join(" & ")}</span></Link>
                 : <span className="pill reveal"><b>New</b><span>watsonx.ai &amp; watsonx.data administration courses</span></span>}
               <h1 className="reveal"><span className="ln">Empowering minds.</span><span className="ln">Enabling futures.</span></h1>
               <p className="sub reveal">Hands-on training in <span className="rotator">{ROTATE.map((w) => <span key={w} className="grad">{w}</span>)}</span></p>
@@ -46,11 +47,6 @@ export default function Home() {
               {classes.some((s) => !s.free) && (
                 <Link className="btn hero-classes reveal" to="/training#public-classes">
                   <Clock />Public classroom courses<Arrow />
-                </Link>
-              )}
-              {classes.some((s) => s.free) && (
-                <Link className="btn hero-classes reveal" to="/training#free-classes" style={{ marginLeft: classes.some((s) => !s.free) ? 24 : 0 }}>
-                  <Clock />Free live classes<Arrow />
                 </Link>
               )}
               <div className="hero-tags reveal">Popular: {['DataStage', 'Cloud Pak for Data', 'Maximo', 'Cognos', 'Guardium'].map((t) => <Link key={t} to={`/training?q=${encodeURIComponent(t)}`}>{t}</Link>)}</div>

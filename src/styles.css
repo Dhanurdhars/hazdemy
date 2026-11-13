@@ -818,6 +818,10 @@ section.bot{padding:0}
 .vclass-list .vn a:hover{color:var(--brand);text-decoration:underline;text-underline-offset:3px}
 .vclass-list .vt{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--ink-2);white-space:nowrap}
 .vclass-list .vt svg{width:16px;height:16px;color:var(--brand)}
+.vclass.free{position:relative;border:2px solid #2f8a5b;box-shadow:0 0 0 6px rgba(47,138,91,.14),0 18px 44px -18px rgba(20,103,74,.55);animation:free-glow 2.8s ease-in-out infinite}
+@keyframes free-glow{50%{box-shadow:0 0 0 10px rgba(47,138,91,.07),0 18px 44px -18px rgba(20,103,74,.55)}}
+.vclass.free .vclass-head .eyebrow{align-self:flex-start;padding:5px 12px;border-radius:999px;background:linear-gradient(120deg,#f7cf7a,#f0a93b);color:#4a2a00 !important;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.vclass.free .vd small{color:#14674a;font-weight:600}
 .vclass.free .vclass-head{background:linear-gradient(150deg,#0b3b2c,#14674a 60%,#2f8a5b)}
 .vclass.free .vclass-head .eyebrow{color:#bff0cf}
 .vclass.free .vclass-head p{color:#d3eedd}
@@ -831,7 +835,7 @@ section.bot{padding:0}
   .vclass-list .vt{grid-column:1}
   .vclass-list .btn{grid-column:2;grid-row:2/4}
 }
-@media (prefers-reduced-motion:reduce){.ann-txt,.ann-timer{animation:none}}
+@media (prefers-reduced-motion:reduce){.ann-txt,.ann-timer,.vclass.free{animation:none}}
 
 /* home hero: link to the public classroom courses on the training catalog */
 .vclass{scroll-margin-top:calc(116px + var(--ann-h))}
@@ -840,3 +844,21 @@ section.bot{padding:0}
 .hero-classes svg{width:18px;height:18px;flex:none}
 :root[data-theme="dark"] .hero-classes{color:#f7cf7a}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .hero-classes{color:#f7cf7a}}
+
+/* home hero: one-line badge for the free live classes, with a small round "FREE" stamp */
+.pill.free-stamp{gap:12px;padding:4px 18px 4px 4px;overflow:visible}
+.pill.free-stamp>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.free-stamp .stamp{flex:none;width:68px;height:68px;margin:-14px -2px -14px -10px;transform:rotate(-6deg);filter:drop-shadow(0 0 6px rgba(179,38,42,.55)) drop-shadow(0 5px 10px rgba(78,4,5,.3));transition:transform .35s cubic-bezier(.3,1.4,.5,1)}
+.free-stamp:hover .stamp{transform:rotate(0) scale(1.08)}
+.free-stamp:hover>span{color:var(--brand)}
+.stamp-ring{fill:none;stroke:#f7cf7a;stroke-width:3;opacity:.7}
+.stamp-star{fill:#f7cf7a;opacity:.85}
+.stamp-band{filter:drop-shadow(0 3px 3px rgba(0,0,0,.3))}
+.stamp-band-line{fill:none;stroke:#f7cf7a;stroke-width:2.5}
+.stamp-word{fill:#fff;font:800 50px var(--f-head);letter-spacing:.04em}
+@media (max-width:640px){.pill.free-stamp{align-items:center;padding:4px 14px 4px 4px}.pill.free-stamp>span{white-space:normal}}
+@media (prefers-reduced-motion:reduce){.free-stamp .stamp{transition:none}}
+/* home hero: less room above the Free badge and between it and the heading */
+.hero:has(.free-stamp){padding-top:112px}
+.hero .free-stamp+h1{margin-top:12px}
+@media (max-width:760px){.hero:has(.free-stamp){padding-top:96px}}
