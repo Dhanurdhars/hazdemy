@@ -818,6 +818,9 @@ section.bot{padding:0}
 .vclass-list .vn a:hover{color:var(--brand);text-decoration:underline;text-underline-offset:3px}
 .vclass-list .vt{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--ink-2);white-space:nowrap}
 .vclass-list .vt svg{width:16px;height:16px;color:var(--brand)}
+.vclass.free .vclass-head{background:linear-gradient(150deg,#0b3b2c,#14674a 60%,#2f8a5b)}
+.vclass.free .vclass-head .eyebrow{color:#bff0cf}
+.vclass.free .vclass-head p{color:#d3eedd}
 @media (max-width:1000px){.vclass{grid-template-columns:1fr}}
 @media (max-width:640px){
   .vclass-head{padding:22px}

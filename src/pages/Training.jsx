@@ -5,6 +5,7 @@ import { hours, askPath, coursePath } from '../lib/format';
 import { AskButton, CourseCard, LevelBars, PageHead } from '../components/UI';
 import { Arrow, Clock, Download, Grid, Search, Table } from '../components/Icons';
 import { toast } from '../lib/toast';
+import { EnrollLink } from '../components/ClassBanner';
 
 // Columns mirror the green columns of the course sheet (Pre Reqs / Persona live on each course page)
 const COLS = [
@@ -46,25 +47,29 @@ function Chips({ value, onChange, options }) {
 
 const monthName = (t) => new Date(t).toLocaleString('en-US', { month: 'long', timeZone: 'UTC' });
 
-/** Announcement of the upcoming public virtual classes, until the last one ends. */
-function VirtualClasses() {
-  const list = openSessions();
+/** Announcement of the upcoming public virtual classes (or, with `free`, the free ones), until the last one ends. */
+function VirtualClasses({ free = false }) {
+  const list = openSessions().filter((s) => s.free === free);
   if (!list.length) return null;
   const now = monthName(Date.now());
   const months = [...new Set(list.map((s) => monthName(s.days[0])))].map((m) => (m === now ? 'this month' : `in ${m}`));
+  const id = free ? 'free-classes' : 'public-classes';
   return (
-    <section className="vclass reveal" id="public-classes" aria-labelledby="vclass-h">
+    <section className={`vclass reveal ${free ? 'free' : ''}`} id={id} aria-labelledby={`${id}-h`}>
       <div className="vclass-head">
-        <span className="eyebrow">Live virtual classes</span>
-        <h2 id="vclass-h">Join a public virtual class {months.join(' and ')}</h2>
-        <p>Instructor-led online classes open to individuals and small teams. Pick a date and enroll — we will confirm your seat and send joining details.</p>
+        <span className="eyebrow">{free ? 'Free virtual classes' : 'Live virtual classes'}</span>
+        {free ? <h2 id={`${id}-h`}>Join a free live class {months.join(' and ')}</h2>
+          : <h2 id={`${id}-h`}>Join a public virtual class {months.join(' and ')}</h2>}
+        <p>{free
+          ? 'Short live sessions on Zoom, free and open to everyone. Register on Zoom to get your joining link.'
+          : 'Instructor-led online classes open to individuals and small teams. Pick a date and enroll — we will confirm your seat and send joining details.'}</p>
       </div>
       <ul className="vclass-list">{list.map((s) => (
         <li key={s.id}>
-          <span className="vd"><b>{s.dates}</b><small>{s.days.length} days</small></span>
-          <span className="vn"><Link to={coursePath(s)}>{s.name}</Link><small>{s.code} · IBM {s.ibm}{s.instructor && ` · with ${s.instructor}`}</small></span>
+          <span className="vd"><b>{s.dates}</b><small>{s.length}{s.free && ' · Free'}</small></span>
+          <span className="vn"><Link to={coursePath(s)}>{s.name}</Link><small>{s.code}{s.ibm && ` · IBM ${s.ibm}`}{s.instructor && ` · with ${s.instructor}`}{s.register && ' · on Zoom'}</small></span>
           <span className="vt"><Clock />{s.hours}</span>
-          <Link className="btn btn-primary sm" to={askPath(s, s)}>Enroll <Arrow /></Link>
+          <EnrollLink className="btn btn-primary sm" s={s}> <Arrow /></EnrollLink>
         </li>
       ))}</ul>
     </section>
@@ -80,8 +85,8 @@ export default function Training() {
 
   // Arriving from the home page's "Public classroom courses" button (after Layout's scroll to top).
   useEffect(() => {
-    if (loc.hash !== '#public-classes') return;
-    const t = setTimeout(() => document.getElementById('public-classes')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+    if (loc.hash !== '#public-classes' && loc.hash !== '#free-classes') return;
+    const t = setTimeout(() => document.getElementById(loc.hash.slice(1))?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
     return () => clearTimeout(t);
   }, [loc.hash]);
   useEffect(() => {
@@ -114,7 +119,7 @@ export default function Training() {
     <>
       <PageHead crumbs={[{ label: 'Training' }]} title="Training catalog"
         lead={`${COURSES.length} instructor-led courses from the Hazdemy course directory — with product, course code, duration, description and skill level for every course.`} />
-      <div className="wrap wide"><VirtualClasses /><div className="catalog">
+      <div className="wrap wide"><VirtualClasses free /><VirtualClasses /><div className="catalog">
         <div className="fpanel reveal">
           <label className="search"><Search /><input value={f.q} onChange={(e) => set('q')(e.target.value)} placeholder="Search by product, course code, name, description or persona" /></label>
           <div className="fgrid">

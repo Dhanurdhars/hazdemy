@@ -30,10 +30,16 @@ export function useNow() {
   return now;
 }
 
+/** Enroll button for public class `s`: its Zoom registration page in a new tab when it has one, otherwise the contact form. */
+export function EnrollLink({ s, className, label = 'Enroll', children }) {
+  if (s.register) return <a className={className} href={s.register} target="_blank" rel="noopener noreferrer" title="Opens the Zoom registration page">Register{children}</a>;
+  return <Link className={className} to={askPath(s, s)}>{label}{children}</Link>;
+}
+
 export function Countdown({ s, p }) {
   const t = Math.floor(p.left / 1000);
   const d = Math.floor(t / 86400), h = Math.floor(t / 3600) % 24, m = Math.floor(t / 60) % 60;
-  const label = p.live ? `Live now · Day ${p.day} of ${s.days.length}` : p.day === 1 ? 'Starts in' : `Day ${p.day} starts in`;
+  const label = p.live ? (s.days.length > 1 ? `Live now · Day ${p.day} of ${s.days.length}` : 'Live now') : p.day === 1 ? 'Starts in' : `Day ${p.day} starts in`;
   return (
     <span className="ann-timer" aria-live="off">
       <small>{label}</small>
@@ -80,7 +86,7 @@ export default function ClassBanner() {
       onFocus={() => setPaused(true)} onBlur={(e) => !e.currentTarget.contains(e.relatedTarget) && setPaused(false)}>
       <div className="wrap">
         <Link key={s.id} className="ann-main" to={coursePath(s)} title={`${s.name} (${s.code}) — view course and schedule`}>
-          <span className={`ann-tag ${p.live ? 'live' : ''}`}>{p.live ? 'Live' : 'Upcoming training'}</span>
+          <span className={`ann-tag ${p.live ? 'live' : ''}`}>{p.live ? 'Live' : s.free ? 'Free virtual class' : 'Upcoming training'}</span>
           <span className="ann-txt">
             <b className="ann-name">{s.name}</b>
             <span className="ann-meta">{s.instructor && <span className="ins"> · with {s.instructor}</span>} · {s.dates}<span className="hrs"> · {s.hours}</span></span>
@@ -96,7 +102,7 @@ export default function ClassBanner() {
           </span>
         )}
         <Link className="ann-cta ghost" to={coursePath(s)}>View course details</Link>
-        <Link className="ann-cta" to={askPath(s, s)}>Enroll</Link>
+        <EnrollLink className="ann-cta" s={s} />
         <button className="ann-x" onClick={dismiss} aria-label="Hide announcement"><Close /></button>
       </div>
     </div>

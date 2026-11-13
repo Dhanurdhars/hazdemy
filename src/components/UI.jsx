@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { LEVELS, areaOf } from '../data/catalog';
+import { LEVELS, areaOf, openSessions } from '../data/catalog';
 import { dur, askPath, coursePath } from '../lib/format';
 import { Arrow, Chat, Clock } from './Icons';
 
@@ -13,11 +13,20 @@ export const LevelBars = ({ level }) => {
 };
 
 
-export const AskButton = ({ course, small }) => (
-  <Link className={`ask ${small ? 'sm' : ''}`} to={askPath(course)}>
-    <Chat />Ask for details
-  </Link>
-);
+/** "Ask for details" for a course; for a course whose next public class has a Zoom registration page, "Register" straight to it. */
+export const AskButton = ({ course, small }) => {
+  const reg = openSessions(course.code).find((s) => s.register);
+  if (reg) return (
+    <a className={`ask ${small ? 'sm' : ''}`} href={reg.register} target="_blank" rel="noopener noreferrer" title={`Register on Zoom for the ${reg.dates} class`}>
+      <Arrow />Register
+    </a>
+  );
+  return (
+    <Link className={`ask ${small ? 'sm' : ''}`} to={askPath(course)}>
+      <Chat />Ask for details
+    </Link>
+  );
+};
 
 export function CourseCard({ course: c, index = 0 }) {
   const a = areaOf(c);

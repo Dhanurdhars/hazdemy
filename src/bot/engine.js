@@ -143,25 +143,37 @@ const FAQ=[
 const UPCOMING=/\b(upcoming|next (class|batch|session|training|course)|public (class|training|session)|virtual (class|training|session)|(class|training|course) (dates?|schedule|calendar|timings?)|schedule[ds]? (class|training)|when (is|does|will)\b.*\b(class|training|batch|start)|enrol+(ment)?|instructor|trainer|who (is )?(teach|teaching|running)|live class)/i;
 function classWhen(s){
   const now=Date.now();
-  for(let i=0;i<s.days.length;i++){const t=s.days[i];if(now<t){const d=Math.floor((t-now)/864e5),h=Math.floor((t-now)/36e5)%24;return (i?`Day ${i+1} starts`:'Starts')+` in <b>${d?`${d} day${d>1?'s':''}${h?`, ${h} hr${h>1?'s':''}`:''}`:`${Math.max(1,Math.ceil((t-now)/36e5))} hr`}</b>`}if(now<t+s.dayLength)return `<b>Live now</b> — day ${i+1} of ${s.days.length}`}
+  for(let i=0;i<s.days.length;i++){const t=s.days[i];if(now<t){const d=Math.floor((t-now)/864e5),h=Math.floor((t-now)/36e5)%24;return (i?`Day ${i+1} starts`:'Starts')+` in <b>${d?`${d} day${d>1?'s':''}${h?`, ${h} hr${h>1?'s':''}`:''}`:`${Math.max(1,Math.ceil((t-now)/36e5))} hr`}</b>`}if(now<t+s.dayLength)return s.days.length>1?`<b>Live now</b> — day ${i+1} of ${s.days.length}`:'<b>Live now</b>'}
   return '';
 }
 const sessionCard=(s)=>{const c=byCode[s.code];const a=c?AREAS[c.area]||AREAS.Data:AREAS.Data;
   return `<div class="bc" style="--c:${a.c}"><div class="t"><span>📅 ${esc(s.dates)}</span><span>${esc(s.code)}</span></div><h5>${esc(s.name)}</h5>
-  <ul class="bc-sched"><li><b>Dates:</b> ${esc(s.when)}</li><li><b>Time:</b> ${esc(s.hours)}, daily</li>${s.instructor?`<li><b>Instructor:</b> ${esc(s.instructor)}</li>`:''}</ul>
+  <ul class="bc-sched"><li><b>${s.days.length>1?'Dates':'Date'}:</b> ${esc(s.when)}</li><li><b>Time:</b> ${esc(s.hours)}${s.days.length>1?', daily':` (${esc(s.length)})`}</li>${s.instructor?`<li><b>Instructor:</b> ${esc(s.instructor)}</li>`:''}${s.free?`<li><b>Cost:</b> Free${s.register?' — register on Zoom to attend':''}</li>`:''}</ul>
   <p style="margin-top:6px;font-size:13px">⏳ ${classWhen(s)}</p>
-  <div class="a"><a data-link href="/course/${encodeURIComponent(s.code)}" data-close>Course page</a><a class="pri" data-link href="/contact?course=${encodeURIComponent(s.code)}&class=${encodeURIComponent(s.id)}" data-close>Enroll</a></div></div>`};
+  <div class="a"><a data-link href="/course/${encodeURIComponent(s.code)}" data-close>Course page</a>${s.register?`<a class="pri" href="${esc(s.register)}" target="_blank" rel="noopener noreferrer">Register</a>`:`<a class="pri" data-link href="/contact?course=${encodeURIComponent(s.code)}&class=${encodeURIComponent(s.id)}" data-close>Enroll</a>`}</div></div>`};
 /** The public virtual classes still to come: all of them, or only those of course `code`. */
 function upcoming(code){
   const all=openSessions(),mine=code?openSessions(code):[];
   if(!all.length)return say("There's no public class scheduled right now — but we run private sessions on any course, on your dates.",['Help me choose','Contact the team']);
   if(mine.length){st.ctx=byCode[code]||st.ctx;return say(`${mine.length>1?'Upcoming public virtual classes':'The next public virtual class'} for this course:${mine.map(sessionCard).join('')}`,['Prerequisites?','Who should attend?','All upcoming training','Get details'],'wide')}
-  const codes=new Set(all.map((s)=>s.code));if(codes.size===1)st.ctx=byCode[all[0].code]||st.ctx;
-  return say(`📅 <b>Upcoming public virtual classes</b> — live and instructor-led, Nov–Dec 2026:${all.map(sessionCard).join('')}`,['Help me choose','Get details'],'wide');
+  const paid=all.filter((s)=>!s.free);
+  if(!paid.length)return freeClasses();
+  const codes=new Set(paid.map((s)=>s.code));if(codes.size===1)st.ctx=byCode[paid[0].code]||st.ctx;
+  return say(`📅 <b>Upcoming public virtual classes</b> — live and instructor-led, Nov–Dec 2026:${paid.map(sessionCard).join('')}`,[...freeChip(),'Help me choose','Get details'],'wide');
 }
-const classChip=()=>openSessions().length?['Upcoming training']:[];
+/** The free classes still to come. */
+function freeClasses(){
+  const list=openSessions().filter((s)=>s.free);
+  if(!list.length)return say("There are no free classes scheduled right now. Want to see our upcoming public classes instead?",[...paidChip(),'Help me choose','Contact the team']);
+  const codes=new Set(list.map((s)=>s.code));if(codes.size===1)st.ctx=byCode[list[0].code]||st.ctx;
+  return say(`🎁 <b>Free live classes</b> — short sessions on Zoom, open to everyone. Register on Zoom to get your joining link:${list.map(sessionCard).join('')}`,[...paidChip(),'Help me choose','Get details'],'wide');
+}
+const FREE=/\b(free (live )?(class(es)?|courses?|training|sessions?|webinars?)|webinars?|no cost|free of (cost|charge))\b|^free$/i;
+const freeChip=()=>openSessions().some((s)=>s.free)?['Free classes']:[];
+const paidChip=()=>openSessions().some((s)=>!s.free)?['Upcoming training']:[];
+const classChip=()=>[...freeChip(),...paidChip()];
 
-function help(){return say(`I'm <b>Haz</b>, Hazdemy's course advisor. I can:<ul><li>Find courses — <i>"DataStage for beginners"</i>, <i>"Guardium under 3 days"</i></li><li>Recommend a path for your role</li><li>Explain prerequisites and who a course is for</li><li>Compare courses — <i>"compare HAZ-CG-ADM and HAZ-CG-ARB"</i></li><li>Show upcoming public training — dates, times and instructor</li><li>Connect you to our team for details and pricing</li></ul>`,[...classChip(),'Help me choose','Browse all areas','Get details'])}
+function help(){return say(`I'm <b>Haz</b>, Hazdemy's course advisor. I can:<ul><li>Find courses — <i>"DataStage for beginners"</i>, <i>"Guardium under 3 days"</i></li><li>Recommend a path for your role</li><li>Explain prerequisites and who a course is for</li><li>Compare courses — <i>"compare HAZ-CG-ADM and HAZ-CG-ARB"</i></li><li>Show upcoming public training — dates, times and instructor</li><li>Show free live classes you can register for on Zoom</li><li>Connect you to our team for details and pricing</li></ul>`,[...classChip(),'Help me choose','Browse all areas','Get details'])}
 
 /* ---------- brain ---------- */
 function reply(raw){
@@ -169,6 +181,7 @@ function reply(raw){
   const lq=norm(q);
   if(st.flow&&!/^(start over|reset|cancel)$/i.test(q))return flowStep(q);
   if(/^all upcoming training$/i.test(q))return upcoming();
+  if(FREE.test(q))return freeClasses();
   const ctxClass=st.ctx&&openSessions(st.ctx.code).length>0;
   if(ctxClass&&(/^class schedule$/i.test(q)||/\b(when|dates?|schedule|timings?|what time|start|enrol+(ment)?|instructor|trainer)\b/i.test(q)))return upcoming(st.ctx.code);
   if(UPCOMING.test(q))return upcoming();
@@ -221,10 +234,10 @@ function reply(raw){
 
 function greet(path=''){
   const m=path.match(/\/course\/([^?/]+)/);const c=m&&byCode[decodeURIComponent(m[1])];
-  const all=openSessions(),mine=c?openSessions(c.code):[];
-  if(mine.length){st.ctx=c;const s=mine[0];return say(`Hi! I'm <b>Haz</b>. <b>${esc(c.name)}</b> has a public virtual class coming up — <b>${esc(s.dates)}</b>, ${esc(s.hours)}${s.instructor?`, with ${esc(s.instructor)}`:''}${mine.length>1?`, and ${mine.length-1} more date${mine.length>2?'s':''}`:''}. Want the schedule, prerequisites or who it's for?`,['Class schedule','Prerequisites?','Who should attend?','Get details'])}
+  const all=openSessions(),mine=c?openSessions(c.code):[],paid=all.filter((s)=>!s.free),free=all.filter((s)=>s.free);
+  if(mine.length){st.ctx=c;const s=mine[0];return say(`Hi! I'm <b>Haz</b>. <b>${esc(c.name)}</b> has a ${s.free?'free live':'public virtual'} class coming up — <b>${esc(s.dates)}</b>, ${esc(s.hours)}${s.instructor?`, with ${esc(s.instructor)}`:''}${mine.length>1?`, and ${mine.length-1} more date${mine.length>2?'s':''}`:''}. Want the schedule, prerequisites or who it's for?`,['Class schedule','Prerequisites?','Who should attend?','Get details'])}
   if(c){st.ctx=c;return say(`Hi! I'm <b>Haz</b>. I see you're looking at <b>${esc(c.name)}</b>. Want the prerequisites, who it's for, or full details?`,['Prerequisites?','Who should attend?','Similar courses','Get details'])}
-  return say(`Hi! I'm <b>Haz</b>, Hazdemy's course advisor 👋<br>Tell me what you'd like to learn — a product, a skill or your role — and I'll find the right course from our ${COURSES.length}.${all.length?`<br><br>📅 <b>Upcoming training:</b> ${all.length} public virtual class${all.length>1?'es':''}, starting ${esc(all[0].dates)} with ${esc(all[0].name)}`:''}`,[...classChip(),'Help me choose','Browse all areas','Get details']);
+  return say(`Hi! I'm <b>Haz</b>, Hazdemy's course advisor 👋<br>Tell me what you'd like to learn — a product, a skill or your role — and I'll find the right course from our ${COURSES.length}.${paid.length?`<br><br>📅 <b>Upcoming training:</b> ${paid.length} public virtual class${paid.length>1?'es':''}, starting ${esc(paid[0].dates)} with ${esc(paid[0].name)}`:''}${free.length?`<br>🎁 <b>Free live classes:</b> ${esc(free[0].name)} on Zoom — ${free.map((s)=>esc(s.dates)).join(' and ')}`:''}`,[...classChip(),'Help me choose','Browse all areas','Get details']);
 }
 
 return { reply, greet, state: st };

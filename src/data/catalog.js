@@ -68,26 +68,36 @@ export const COMPANY = {
 };
 
 // Public virtual classes, in date order. Each is announced (banner, course page, catalog, chatbot) until its last day ends.
-// `start` is the first day's start in UTC; the class runs the same hours on `days` consecutive days.
+// `start` is the first day's start in UTC; the class runs the same hours on `days` consecutive days (3 unless set).
 // US Eastern is EST (UTC−5) and Central European is CET (UTC+1) for all of these dates.
+// A `free` class costs nothing; with a `register` link (its Zoom registration page) the Register buttons open that page
+// instead of the contact form.
 const ZONES = { EST: 'America/New_York', CET: 'Europe/Berlin' };
-const session = (code, name, ibm, start, hrs, time, tz, instructor) => {
+const session = (code, name, ibm, start, hrs, time, tz, instructor, { days: n = 3, free = false, register = '' } = {}) => {
   const zone = ZONES[tz], dayLength = hrs * 3600e3;
-  const days = [0, 1, 2].map((i) => start + i * 864e5);
+  const days = Array.from({ length: n }, (_, i) => start + i * 864e5);
   const md = (t, o) => new Intl.DateTimeFormat('en-US', { timeZone: zone, ...o }).format(t);
   const [first, last] = [days[0], days[days.length - 1]];
   const sameMonth = md(first, { month: 'short' }) === md(last, { month: 'short' });
+  const day = { month: 'short', day: 'numeric' }, wday = { weekday: 'short', ...day };
   return {
-    id: `${code}-${new Date(first).toISOString().slice(0, 10)}`, code, ibm, name, instructor,
+    id: `${code}-${new Date(first).toISOString().slice(0, 10)}`, code, ibm, name, instructor, free, register,
     days, dayLength, hrs, zone, end: last + dayLength,
     hours: `${time} ${tz}`,
-    dates: sameMonth ? `${md(first, { month: 'short', day: 'numeric' })}–${md(last, { day: 'numeric' })}` : `${md(first, { month: 'short', day: 'numeric' })} – ${md(last, { month: 'short', day: 'numeric' })}`,
-    when: `${md(first, { weekday: 'short', month: 'short', day: 'numeric' })} – ${md(last, { weekday: 'short', month: 'short', day: 'numeric' })}, ${md(last, { year: 'numeric' })}`,
+    dates: n === 1 ? md(first, day) : sameMonth ? `${md(first, day)}–${md(last, { day: 'numeric' })}` : `${md(first, day)} – ${md(last, day)}`,
+    when: `${md(first, wday)}${n === 1 ? '' : ` – ${md(last, wday)}`}, ${md(last, { year: 'numeric' })}`,
+    length: n === 1 ? `${hrs} hour${hrs === 1 ? '' : 's'}` : `${n} days`,
   };
 };
+// Free one-hour HAZ-AT-013 classes on Zoom. Paste each class's Zoom registration link here.
+const AT013 = ['HAZ-AT-013', 'IBM webMethods Integration : What’s New in v12.1', ''];
+const ZOOM_AT013_NOV19 = 'https://us06web.zoom.us/meeting/register/27DnIfxhQ-SWiBu9yfOjMg';
+const ZOOM_AT013_NOV24 = 'https://us06web.zoom.us/meeting/register/aTNztq3BS4ij1Bnyd2qFJA';
 export const SESSIONS = [
   session('HAZ-AT-008', 'IBM webMethods Integration v12.1 Developer', 'V010037G', Date.UTC(2026, 10, 16, 12), 8, '7 am–3 pm', 'EST', 'Megan Irvine'),
+  session(...AT013, Date.UTC(2026, 10, 19, 15), 1, '10–11 am', 'EST', '', { days: 1, free: true, register: ZOOM_AT013_NOV19 }),
   session('HAZ-DA-0009', 'InfoSphere DataStage 11.7 Developers', 'V010009G', Date.UTC(2026, 10, 23, 7), 5, '8 am–1 pm', 'CET'),
+  session(...AT013, Date.UTC(2026, 10, 24, 12), 1, '7–8 am', 'EST', '', { days: 1, free: true, register: ZOOM_AT013_NOV24 }),
   session('HAZ-DA-0001', 'IBM DataStage NextGen on IBM Cloud Pak for Data', 'V010001G', Date.UTC(2026, 10, 30, 12), 5, '7 am–12 pm', 'EST'),
   session('HAZ-AT-008', 'IBM webMethods Integration v12.1 Developer', 'V010037G', Date.UTC(2026, 11, 7, 12), 8, '1 pm–9 pm', 'CET'),
   session('HAZ-DA-0009', 'InfoSphere DataStage 11.7 Developers', 'V010009G', Date.UTC(2026, 11, 7, 7), 5, '8 am–1 pm', 'CET'),

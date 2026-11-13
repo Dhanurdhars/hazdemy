@@ -3,7 +3,7 @@ import { COURSES, TRACKS, byCode, areaOf, openSessions } from '../data/catalog';
 import { dur, hours, askPath } from '../lib/format';
 import { CourseCard, CTA, LevelBars, PageHead } from '../components/UI';
 import { Arrow, Book, Check, Clock, Key, Mentor, Target, Users } from '../components/Icons';
-import { Countdown, phase, useNow } from '../components/ClassBanner';
+import { Countdown, EnrollLink, phase, useNow } from '../components/ClassBanner';
 import NotFound from './NotFound';
 
 const dayFmt = (s) => new Intl.DateTimeFormat('en-US', { timeZone: s.zone, weekday: 'short', month: 'short', day: 'numeric' });
@@ -18,17 +18,18 @@ function Session({ s, now, next }) {
     <div className="sched">
       <div className="sched-head">
         <div>
-          <span className="eyebrow">{next ? 'Next public class' : 'Also scheduled'} <span className={`st ${p.live ? 'live' : ''}`}>{p.live ? `Live now · Day ${p.day}` : 'Upcoming'}</span></span>
-          <b>{f.format(first)} – {f.format(last)}, 2026</b>
+          <span className="eyebrow">{next ? `Next ${s.free ? 'free ' : ''}public class` : 'Also scheduled'} <span className={`st ${p.live ? 'live' : ''}`}>{p.live ? (s.days.length > 1 ? `Live now · Day ${p.day}` : 'Live now') : 'Upcoming'}</span></span>
+          <b>{f.format(first)}{last !== first && ` – ${f.format(last)}`}, 2026</b>
         </div>
         <Countdown s={s} p={p} />
       </div>
       <ul className="sched-facts">
-        <li><Clock /><span><b>{s.hours}, daily</b><small>Your time: {localFmt.format(first)} – {localFmt.format(first + s.dayLength)} {tzName(first)}</small></span></li>
+        <li><Clock /><span><b>{s.hours}{s.days.length > 1 && ', daily'}</b><small>Your time: {localFmt.format(first)} – {localFmt.format(first + s.dayLength)} {tzName(first)}</small></span></li>
         <li><Mentor /><span><b>{s.instructor || 'To be announced'}</b><small>Instructor</small></span></li>
-        <li><Book /><span><b>{s.days.length} days · {s.days.length * s.hrs} hours</b><small>Live virtual classroom · IBM code {s.ibm}</small></span></li>
+        <li><Book /><span><b>{s.days.length > 1 ? `${s.days.length} days · ${s.days.length * s.hrs} hours` : s.length}{s.free && ' · Free'}</b>
+          <small>{s.register ? 'Live on Zoom · register on Zoom to attend' : 'Live virtual classroom'}{s.ibm && ` · IBM code ${s.ibm}`}</small></span></li>
       </ul>
-      <Link className="btn btn-primary" to={askPath(s, s)}>Enroll in this class <Arrow /></Link>
+      <EnrollLink className="btn btn-primary" s={s} label="Enroll in this class"> <Arrow /></EnrollLink>
     </div>
   );
 }
@@ -82,7 +83,7 @@ export default function Course() {
               <div className="row"><dt>Course code</dt><dd>{c.code}</dd></div>
               <div className="row"><dt>Product</dt><dd>{c.product}</dd></div>
               <div className="row"><dt>Area</dt><dd>{c.area}</dd></div>
-              <div className="row"><dt>Duration</dt><dd>{dur(c.days)} · {hours(c.days)}</dd></div>
+              <div className="row"><dt>Duration</dt><dd>{c.days < 1 ? dur(c.days) : `${dur(c.days)} · ${hours(c.days)}`}</dd></div>
               <div className="row"><dt>Skill level</dt><dd style={{ display: 'flex', gap: 8, alignItems: 'center', '--c': a.c }}><LevelBars level={c.level} />{c.level}</dd></div>
               {next && <div className="row"><dt>Next class</dt><dd>{next.dates} · {next.hours}</dd></div>}
               {next?.instructor && <div className="row"><dt>Instructor</dt><dd>{next.instructor}</dd></div>}

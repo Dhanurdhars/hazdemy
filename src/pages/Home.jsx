@@ -22,6 +22,7 @@ export default function Home() {
   const nav = useNavigate();
   const [q, setQ] = useState('');
   const classes = openSessions();
+  const freeNext = classes.find((s) => s.free); // the hero pill points to the free classes while any are still to come
   const featured = ['HAZ-AT-008', 'HAZ-DA-0048', 'HAZ-DA-0049'].map((k) => byCode[k]).filter(Boolean);
   const feat = [...featured, ...COURSES.filter((c) => c.level === 'Advanced' && !featured.includes(c))].slice(0, 6);
 
@@ -32,7 +33,9 @@ export default function Home() {
         <div className="wrap">
           <div className="hero-grid">
             <div>
-              <span className="pill reveal"><b>New</b><span>watsonx.ai &amp; watsonx.data administration courses</span></span>
+              {freeNext
+                ? <Link className="pill reveal" to="/training#free-classes"><b>Free</b><span>{freeNext.name} · {classes.filter((s) => s.free).map((s) => s.dates).join(' & ')}</span></Link>
+                : <span className="pill reveal"><b>New</b><span>watsonx.ai &amp; watsonx.data administration courses</span></span>}
               <h1 className="reveal"><span className="ln">Empowering minds.</span><span className="ln">Enabling futures.</span></h1>
               <p className="sub reveal">Hands-on training in <span className="rotator">{ROTATE.map((w) => <span key={w} className="grad">{w}</span>)}</span></p>
               <p className="lead reveal">Training designed around real delivery. Hazdemy takes your teams from fundamentals to applied, production-ready skills across the IBM technology portfolio — with labs, mentorship and capstones that produce working results.</p>
@@ -40,9 +43,14 @@ export default function Home() {
                 <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={`Search ${COURSES.length} courses — e.g. DataStage, Maximo, Guardium`} aria-label="Search courses" />
                 <button className="btn btn-primary" type="submit">Search</button>
               </form>
-              {classes.length > 0 && (
+              {classes.some((s) => !s.free) && (
                 <Link className="btn hero-classes reveal" to="/training#public-classes">
                   <Clock />Public classroom courses<Arrow />
+                </Link>
+              )}
+              {classes.some((s) => s.free) && (
+                <Link className="btn hero-classes reveal" to="/training#free-classes" style={{ marginLeft: classes.some((s) => !s.free) ? 24 : 0 }}>
+                  <Clock />Free live classes<Arrow />
                 </Link>
               )}
               <div className="hero-tags reveal">Popular: {['DataStage', 'Cloud Pak for Data', 'Maximo', 'Cognos', 'Guardium'].map((t) => <Link key={t} to={`/training?q=${encodeURIComponent(t)}`}>{t}</Link>)}</div>
